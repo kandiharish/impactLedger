@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+
+  --color-primary: #0F172A;
+  --color-secondary: #334155;
+  --color-accent: #D4A017;
+  --color-background-warm: #FAFAF8;
+  --color-surface-pure: #FFFFFF;
+  --color-border-light: #E5E7EB;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+  --color-success-green: #16A34A;
+  --color-warning-amber: #F59E0B;
+  --color-error-red: #DC2626;
+
+  --radius-button: 12px;
+  --radius-card: 18px;
+  --radius-input: 12px;
+  --radius-image: 18px;
+}
+
+/* Custom Base Styles */
+body {
+  background-color: var(--color-background-warm);
+  color: var(--color-text-primary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+}
+
+@keyframes marquee-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.animate-marquee-left {
+  display: flex;
+  width: max-content;
+  animation: marquee-left 50s linear infinite;
+}
+
+.animate-marquee-right {
+  display: flex;
+  width: max-content;
+  animation: marquee-right 50s linear infinite;
+}
+
+.animate-marquee-left:hover,
+.animate-marquee-right:hover {
+  animation-play-state: paused;
+}
+
