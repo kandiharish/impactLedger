@@ -1,123 +1,49 @@
-export interface Story {
-  id?: string;
-  _id?: string;
-  title: string;
-  slug: string;
-  summary: string;
-  content: string;
-  category: string;
-  author: {
-    name: string;
-    role: string;
-    avatar: string;
-  };
-  featuredImage: string;
-  publishedDate: string;
-  readingTime: string;
-  isFeatured?: boolean;
-  isEditorsPick?: boolean;
-  organizationId?: string;
-}
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import { 
+  Category, 
+  Organization, 
+  Story, 
+  MagazineIssue, 
+  Interview, 
+  Testimonial, 
+  FAQ 
+} from './models';
 
-export interface Category {
-  id?: string;
-  _id?: string;
-  name: string;
-  slug: string;
-  description: string;
-  iconName: string; // Lucide icon mapping
-}
+dotenv.config();
 
-export interface MagazineIssue {
-  id?: string;
-  _id?: string;
-  issueNumber: string;
-  title: string;
-  month: string;
-  year: string;
-  coverImage: string;
-  editorsNote: string;
-  featuredArticles: string[]; // Story titles
-}
-
-export interface Organization {
-  id?: string;
-  _id?: string;
-  name: string;
-  logo: string;
-  category: string;
-  location: string;
-  impactSummary: string;
-  description: string;
-}
-
-export interface Interview {
-  id?: string;
-  _id?: string;
-  title: string;
-  interviewee: string;
-  position: string;
-  organization: string;
-  photo: string;
-  quote: string;
-  highlights: string[];
-  questions: { q: string; a: string }[];
-}
-
-export interface Testimonial {
-  id?: string;
-  _id?: string;
-  quote: string;
-  author: string;
-  role: string;
-  organization: string;
-}
-
-export interface FAQItem {
-  id?: string;
-  _id?: string;
-  question: string;
-  answer: string;
-}
-
-export const mockCategories: Category[] = [
+const categoriesData = [
   {
-    id: '1',
     name: 'CSR',
     slug: 'csr',
     description: 'Corporate Social Responsibility frameworks, partnerships, and high-impact corporate philanthropy.',
     iconName: 'Building2'
   },
   {
-    id: '2',
     name: 'NGOs',
     slug: 'ngos',
     description: 'Grassroots achievements, field challenges, and updates from non-governmental entities.',
     iconName: 'HeartHandshake'
   },
   {
-    id: '3',
     name: 'Healthcare',
     slug: 'healthcare',
     description: 'Rural medical camps, healthcare access, sanitation drives, and preventive medicine initiatives.',
     iconName: 'Activity'
   },
   {
-    id: '4',
     name: 'Education',
     slug: 'education',
     description: 'Transformative digital literacy, child education programs, and infrastructure upgrades in rural schools.',
     iconName: 'GraduationCap'
   },
   {
-    id: '5',
     name: 'Women Empowerment',
     slug: 'women-empowerment',
     description: 'Self-help groups, micro-financing, skill building, and leadership journeys of women changemakers.',
     iconName: 'Users'
   },
   {
-    id: '6',
     name: 'Environment',
     slug: 'environment',
     description: 'Aforestation drives, waste management projects, renewable energy transition, and conservation efforts.',
@@ -125,9 +51,8 @@ export const mockCategories: Category[] = [
   }
 ];
 
-export const mockOrganizations: Organization[] = [
+const organizationsData = [
   {
-    id: 'org1',
     name: 'Himalayan Seed Trust',
     logo: '🌱',
     category: 'Environment',
@@ -136,7 +61,6 @@ export const mockOrganizations: Organization[] = [
     description: 'The Himalayan Seed Trust works with local mountain communities to restore native vegetation, ensuring water security and ecological balance in the lower Himalayan ridges.'
   },
   {
-    id: 'org2',
     name: 'Pragati Shikshan Sansthan',
     logo: '📚',
     category: 'Education',
@@ -145,7 +69,6 @@ export const mockOrganizations: Organization[] = [
     description: 'Pragati Shikshan Sansthan bridges the digital divide in rural schools by deploying low-cost solar-powered computer labs and localized digital curricula.'
   },
   {
-    id: 'org3',
     name: 'Niramaya Health Coalition',
     logo: '🏥',
     category: 'Healthcare',
@@ -155,9 +78,8 @@ export const mockOrganizations: Organization[] = [
   }
 ];
 
-export const mockStories: Story[] = [
+const storiesData = [
   {
-    id: 'story1',
     title: 'The Green Rebirth of the Himalayan Ridges',
     slug: 'green-rebirth-himalayan-ridges',
     summary: 'How community-led seed banks and traditional oak planting are bringing drying water springs back to life across rural Uttarakhand.',
@@ -176,10 +98,9 @@ export const mockStories: Story[] = [
     publishedDate: 'June 18, 2026',
     readingTime: '5 min read',
     isFeatured: true,
-    organizationId: 'org1'
+    isEditorsPick: false
   },
   {
-    id: 'story2',
     title: 'Solar Pixels: Rural Classrooms Go Digital',
     slug: 'solar-pixels-rural-classrooms-digital',
     summary: 'A solar-powered classroom initiative in Bihar is defying power grid limitations and transforming student attendance rates.',
@@ -197,11 +118,10 @@ export const mockStories: Story[] = [
     featuredImage: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=800&q=80',
     publishedDate: 'June 25, 2026',
     readingTime: '4 min read',
-    isEditorsPick: true,
-    organizationId: 'org2'
+    isFeatured: false,
+    isEditorsPick: true
   },
   {
-    id: 'story3',
     title: 'The Mobile Healing Vans of Thar Desert',
     slug: 'mobile-healing-vans-thar-desert',
     summary: 'Niramaya Health Coalition is using off-grid mobile clinics to slash maternal mortality rates in desert communities.',
@@ -219,11 +139,10 @@ export const mockStories: Story[] = [
     featuredImage: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80',
     publishedDate: 'June 29, 2026',
     readingTime: '6 min read',
-    isEditorsPick: true,
-    organizationId: 'org3'
+    isFeatured: false,
+    isEditorsPick: true
   },
   {
-    id: 'story4',
     title: 'Weaving Independence: The Loom Revolution of Barmer',
     slug: 'weaving-independence-loom-revolution-barmer',
     summary: 'A micro-finance collective is enabling rural women artisans to break free from local middlemen and sell textiles globally.',
@@ -239,13 +158,13 @@ export const mockStories: Story[] = [
     featuredImage: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80',
     publishedDate: 'June 10, 2026',
     readingTime: '4 min read',
-    isFeatured: false
+    isFeatured: false,
+    isEditorsPick: false
   }
 ];
 
-export const mockMagazineIssues: MagazineIssue[] = [
+const magazineIssuesData = [
   {
-    id: 'mag1',
     issueNumber: 'Vol. 12',
     title: 'The Green Standard',
     month: 'June',
@@ -259,7 +178,6 @@ export const mockMagazineIssues: MagazineIssue[] = [
     ]
   },
   {
-    id: 'mag2',
     issueNumber: 'Vol. 11',
     title: 'Bridges of Empowerment',
     month: 'March',
@@ -272,9 +190,8 @@ export const mockMagazineIssues: MagazineIssue[] = [
   }
 ];
 
-export const mockInterviews: Interview[] = [
+const interviewsData = [
   {
-    id: 'int1',
     title: 'Local Action Beats Global Rhetoric',
     interviewee: 'Sunita Devi',
     position: 'Founder',
@@ -299,16 +216,14 @@ export const mockInterviews: Interview[] = [
   }
 ];
 
-export const mockTestimonials: Testimonial[] = [
+const testimonialsData = [
   {
-    id: 't1',
     quote: 'The Impact Ledger does not just write articles—they provide deep, investigative narratives that give our grassroots efforts national visibility and credibility.',
     author: 'Sunita Devi',
     role: 'Director',
     organization: 'Himalayan Seed Trust'
   },
   {
-    id: 't2',
     quote: 'As a CSR committee member, this publication is our primary source of inspiration. It shows what is actually working in field implementations.',
     author: 'Vikramaditya Shah',
     role: 'CSR Chair',
@@ -316,25 +231,137 @@ export const mockTestimonials: Testimonial[] = [
   }
 ];
 
-export const mockFAQs: FAQItem[] = [
+// Seed the 15 FAQs directly from main doc.md
+const faqsData = [
   {
-    id: 'faq1',
     question: 'What is The Impact Ledger?',
-    answer: 'The Impact Ledger is a premium editorial publication dedicated to documenting, celebrating, and amplifying stories of change, leadership, and sustainability across NGOs, CSR initiatives, and grassroots movements.'
+    answer: 'The Impact Ledger is a premium magazine dedicated to celebrating impact, innovation, leadership, and social progress. Through compelling stories, insightful features, and thought-provoking content, the magazine highlights individuals, organizations, and initiatives that are creating meaningful change across society.'
   },
   {
-    id: 'faq2',
-    question: 'How can our organization submit a story of impact?',
-    answer: 'You can submit stories using our "Submit Your Story" portal. Submissions undergo thorough editorial review for authenticity, measurable impact, and community engagement before publication.'
+    question: 'What is the mission of The Impact Ledger?',
+    answer: 'Our mission is to document, recognize, and amplify stories that inspire positive action. We aim to create a platform where achievements, ideas, and initiatives that contribute to social, economic, and environmental progress receive the visibility they deserve.'
   },
   {
-    id: 'faq3',
-    question: 'Is The Impact Ledger a print or digital publication?',
-    answer: 'We operate primarily as a digital publication releasing monthly thematic editions, with special print editions distributed annually to corporate, NGO, and government stakeholders.'
+    question: 'Who is The Impact Ledger designed for?',
+    answer: 'The Impact Ledger is designed for business leaders, CSR professionals, NGOs, policymakers, educators, students, entrepreneurs, investors, changemakers, and readers who are passionate about impact, leadership, and sustainable development.'
   },
   {
-    id: 'faq4',
-    question: 'Do you charge organizations for featuring their stories?',
-    answer: 'No. Authentic editorial stories are covered purely on merit, impact, and journalistic value. We generate revenue through partnerships, newsletter sponsorships, and premium advertisements.'
+    question: 'What kind of content does the magazine feature?',
+    answer: 'Each edition features a curated mix of inspiring stories, expert perspectives, leadership insights, social impact features, community success stories, informative articles, engaging reader sections, and selected industry highlights that provide both knowledge and inspiration.'
+  },
+  {
+    question: 'What topics does The Impact Ledger cover?',
+    answer: 'The magazine covers a broad range of subjects including CSR, NGOs, education, healthcare, women empowerment, sustainability, environment, youth development, livelihoods, innovation, government initiatives, legal affairs, sports, entertainment, beauty and wellness, leadership, humanitarian efforts, and community development.'
+  },
+  {
+    question: 'Is The Impact Ledger only focused on CSR and NGOs?',
+    answer: 'No. While CSR and NGO initiatives are central to our publication, we also explore developments in business, governance, public policy, leadership, innovation, culture, and other sectors that contribute to societal growth and transformation.'
+  },
+  {
+    question: 'Can organizations and individuals be featured in the magazine?',
+    answer: 'Yes. We welcome submissions from corporations, NGOs, government institutions, educational organizations, social enterprises, community groups, and individual changemakers whose work demonstrates meaningful impact and excellence.'
+  },
+  {
+    question: 'How can I submit a story or initiative for consideration?',
+    answer: 'Stories, projects, achievements, and impact initiatives can be submitted through our editorial team for review. Selected submissions may be featured in upcoming editions based on relevance, credibility, and impact.'
+  },
+  {
+    question: 'Is The Impact Ledger available in print?',
+    answer: 'Yes. The Impact Ledger is published as a professionally curated magazine and is available through partner networks, and authorized distribution channels.'
+  },
+  {
+    question: 'Does the magazine accept advertisements?',
+    answer: 'Yes. The Impact Ledger collaborates with organizations, brands, institutions, and partners whose values align with innovation, responsibility, sustainability, and positive societal impact.'
+  },
+  {
+    question: 'What is Corporate Social Responsibility (CSR)?',
+    answer: 'Corporate Social Responsibility (CSR) is the commitment of businesses and organizations to contribute positively to society through initiatives that support education, healthcare, environmental sustainability, community welfare, and inclusive growth.'
+  },
+  {
+    question: 'How does The Impact Ledger ensure content quality?',
+    answer: 'Our editorial team carefully reviews all submissions and featured content to maintain high standards of accuracy, relevance, credibility, and editorial excellence.'
+  },
+  {
+    question: 'What makes The Impact Ledger unique?',
+    answer: 'The Impact Ledger combines impactful storytelling, insightful analysis, inspiring achievements, leadership perspectives, and engaging reader experiences into a single publication that informs, inspires, and celebrates progress.'
+  },
+  {
+    question: 'What is the vision of The Impact Ledger?',
+    answer: 'Our vision is to become a trusted and influential publication that connects people, organizations, and ideas while inspiring collective action toward a more inclusive, sustainable, and prosperous future.'
+  },
+  {
+    question: 'How can I stay connected with The Impact Ledger?',
+    answer: 'Readers can stay connected through special editions, partnerships, and our official communication channels for the latest stories, insights, and opportunities.'
   }
 ];
+
+const seedDB = async () => {
+  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/impactledger';
+  console.log(`Connecting to MongoDB at ${uri}...`);
+  
+  try {
+    await mongoose.connect(uri);
+    console.log('MongoDB connection successful!');
+
+    // Clear existing data
+    console.log('Clearing old database records...');
+    await Category.deleteMany({});
+    await Organization.deleteMany({});
+    await Story.deleteMany({});
+    await MagazineIssue.deleteMany({});
+    await Interview.deleteMany({});
+    await Testimonial.deleteMany({});
+    await FAQ.deleteMany({});
+
+    // Insert categories
+    console.log('Inserting categories...');
+    await Category.insertMany(categoriesData);
+
+    // Insert organizations
+    console.log('Inserting organizations...');
+    const insertedOrgs = await Organization.insertMany(organizationsData);
+
+    // Map organization IDs into stories
+    console.log('Inserting stories...');
+    const modifiedStories = storiesData.map(story => {
+      let orgId = '';
+      if (story.title.includes('Himalayan')) {
+        const found = insertedOrgs.find(o => o.name.includes('Himalayan'));
+        orgId = found ? found._id.toString() : '';
+      } else if (story.title.includes('Classrooms')) {
+        const found = insertedOrgs.find(o => o.name.includes('Pragati'));
+        orgId = found ? found._id.toString() : '';
+      } else if (story.title.includes('Healing Vans')) {
+        const found = insertedOrgs.find(o => o.name.includes('Niramaya'));
+        orgId = found ? found._id.toString() : '';
+      }
+      return orgId ? { ...story, organizationId: orgId } : story;
+    });
+    await Story.insertMany(modifiedStories);
+
+    // Insert magazine issues
+    console.log('Inserting magazine issues...');
+    await MagazineIssue.insertMany(magazineIssuesData);
+
+    // Insert spotlight interviews
+    console.log('Inserting interviews...');
+    await Interview.insertMany(interviewsData);
+
+    // Insert testimonials
+    console.log('Inserting testimonials...');
+    await Testimonial.insertMany(testimonialsData);
+
+    // Insert FAQs
+    console.log('Inserting FAQs...');
+    await FAQ.insertMany(faqsData);
+
+    console.log('Seeding complete! Database is successfully populated.');
+  } catch (error) {
+    console.error('Error during database seeding:', error);
+  } finally {
+    await mongoose.disconnect();
+    console.log('Disconnected from MongoDB.');
+  }
+};
+
+seedDB();

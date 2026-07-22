@@ -11,14 +11,15 @@ export default function FAQAccordion({ items }: { items: FAQItem[] }) {
   return (
     <div className="space-y-4 max-w-3xl mx-auto">
       {items.map((item) => {
-        const isOpen = openId === item.id;
+        const itemId = item._id || item.id || '';
+        const isOpen = openId === itemId;
         return (
           <div 
-            key={item.id} 
+            key={itemId} 
             className="bg-surface-pure border border-border-light rounded-card overflow-hidden transition-all duration-300 shadow-sm"
           >
             <button
-              onClick={() => toggle(item.id)}
+              onClick={() => toggle(itemId)}
               className="w-full flex justify-between items-center px-6 py-5 text-left font-serif font-bold text-primary hover:text-accent transition-colors"
               aria-expanded={isOpen}
             >

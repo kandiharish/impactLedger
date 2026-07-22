@@ -1,357 +1,288 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  mockStories, 
-  mockCategories, 
-  mockMagazineIssues, 
-  mockOrganizations, 
-  mockInterviews, 
-  mockTestimonials, 
-  mockFAQs 
-} from '../data/mockData';
-import StoryCard from '../components/ui/StoryCard';
-import MagazineCard from '../components/ui/MagazineCard';
-import OrganizationCard from '../components/ui/OrganizationCard';
-import InterviewCard from '../components/ui/InterviewCard';
-import FAQAccordion from '../components/ui/FAQAccordion';
-import FadeIn from '../components/ui/FadeIn';
-import StatCounter from '../components/ui/StatCounter';
-import CommunityGallery from '../components/ui/CommunityGallery';
+import { useQuery } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Menu, ArrowUpRight, ArrowRight, ArrowLeft } from 'lucide-react';
+import { api } from '../api';
+import { mockMagazineIssues } from '../data/mockData';
 
-export default function Home() {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
+// --- BlurText Component (Style 2) ---
+const BlurText = ({ text, className = "", delayOffset = 0 }: { text: string, className?: string, delayOffset?: number }) => {
+  const words = text.split(" ");
+  return (
+    <div className={`flex flex-wrap ${className}`}>
+      {words.map((word, i) => (
+        <motion.span
+          key={i}
+          className="inline-block mr-[0.28em]"
+          initial={{ filter: 'blur(10px)', opacity: 0, y: 50 }}
+          whileInView={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.7, delay: delayOffset + (i * 0.1), ease: "easeOut" }}
+        >
+          {word}
+        </motion.span>
+      ))}
+    </div>
+  );
+};
 
-  // Filter stories for different sections
-  const featuredStory = mockStories.find(s => s.isFeatured) || mockStories[0];
-  const editorsPicks = mockStories.filter(s => s.isEditorsPick);
-  const latestStories = mockStories.slice(0, 3);
-  const currentMagazine = mockMagazineIssues[0];
-  const spotlightInterview = mockInterviews[0];
+// --- Magazine Carousel (Style 3) ---
+const MagazineCarousel = ({ issues }: { issues: any[] }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim()) {
-      setSubscribed(true);
-      setEmail('');
-      setTimeout(() => setSubscribed(false), 5000);
-    }
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Preload images
+  useEffect(() => {
+    issues.forEach(issue => {
+      const img = new Image();
+      img.src = issue.coverImage;
+    });
+  }, [issues]);
+
+  const navigate = (dir: 'next' | 'prev') => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    if (dir === 'next') setActiveIndex(prev => (prev + 1) % issues.length);
+    else setActiveIndex(prev => (prev + issues.length - 1) % issues.length);
+    setTimeout(() => setIsAnimating(false), 650);
   };
 
+  // We'll use a set of elegant background colors for the carousel items
+  const bgs = ['#1a1f2e', '#2c2520', '#1c2826', '#2a2432'];
+  
+  // We need exactly 4 items for the specific 3D logic. If we have less, we loop them.
+  const displayIssues = [0, 1, 2, 3].map(i => issues[i % issues.length]);
+
   return (
-    <div className="space-y-24 md:space-y-32">
-      {/* Hero Section */}
-      <section className="relative grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-8">
-        <div className="lg:col-span-6 space-y-6">
-          <FadeIn direction="up">
-            <span className="text-xs uppercase tracking-widest text-accent font-semibold">Editorial Front Page</span>
-          </FadeIn>
-          <FadeIn direction="up" delay={0.1}>
-            <h1 className="text-4xl md:text-6xl font-serif font-bold text-primary leading-[1.1] tracking-tight">
-              Celebrating Stories That Change Lives.
-            </h1>
-          </FadeIn>
-          <FadeIn direction="up" delay={0.2}>
-            <p className="text-base md:text-lg text-text-secondary leading-relaxed font-sans max-w-xl">
-              The Impact Ledger is a premium editorial publication celebrating positive transformation. We document CSR triumphs, grassroots NGO efforts, and community-led sustainability initiatives across the globe.
-            </p>
-          </FadeIn>
-          <FadeIn direction="up" delay={0.3}>
-            <div className="flex flex-wrap gap-4 pt-2">
-              <Link 
-                to="/stories" 
-                className="bg-primary hover:bg-secondary text-white text-xs uppercase tracking-wider font-semibold px-6 py-3.5 rounded-button transition-all shadow-sm transform hover:-translate-y-0.5"
-              >
-                Explore Stories
-              </Link>
-              <Link 
-                to="/submit-story" 
-                className="bg-white hover:bg-background-warm text-primary border border-border-light text-xs uppercase tracking-wider font-semibold px-6 py-3.5 rounded-button transition-all"
-              >
-                Submit Your Story
-              </Link>
-            </div>
-          </FadeIn>
-        </div>
-        <div className="lg:col-span-6">
-          <FadeIn direction="none" delay={0.2}>
-            <div className="relative aspect-[4/3] rounded-card overflow-hidden shadow-md group">
-              <img 
-                src="https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=1000&q=80" 
-                alt="Community transformation"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-103"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent"></div>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
+    <div className="relative w-full overflow-hidden" style={{ backgroundColor: bgs[activeIndex % bgs.length], transition: 'background-color 650ms cubic-bezier(0.4,0,0.2,1)', height: '100vh' }}>
+      {/* Grain overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-40 bg-noise z-50"></div>
 
-      {/* Featured Story Spotlight */}
-      <section className="space-y-8">
-        <FadeIn direction="up">
-          <div className="border-b border-border-light pb-4 flex justify-between items-end">
-            <h2 className="font-serif text-3xl font-bold text-primary tracking-tight">Featured Spotlight</h2>
-            <span className="text-xs text-accent font-semibold uppercase tracking-wider">Read Cover Story</span>
-          </div>
-        </FadeIn>
-        {featuredStory && (
-          <FadeIn direction="up" delay={0.1}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch bg-surface-pure border border-border-light rounded-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-              <div className="lg:col-span-7 relative aspect-video lg:aspect-auto min-h-[300px] overflow-hidden group">
-                <img 
-                  src={featuredStory.featuredImage} 
-                  alt={featuredStory.title} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
-                />
-              </div>
-              <div className="lg:col-span-5 p-8 md:p-12 flex flex-col justify-between space-y-6">
-                <div className="space-y-4">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-accent">{featuredStory.category}</span>
-                  <h3 className="font-serif text-2.5xl md:text-3xl font-bold text-primary leading-tight">
-                    {featuredStory.title}
-                  </h3>
-                  <p className="text-sm text-text-secondary leading-relaxed font-sans">
-                    {featuredStory.summary}
-                  </p>
-                </div>
-                <div className="pt-6 border-t border-border-light flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-bold text-xs">
-                      {featuredStory.author.avatar}
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-primary">{featuredStory.author.name}</p>
-                      <p className="text-[10px] text-text-secondary">{featuredStory.author.role}</p>
-                    </div>
-                  </div>
-                  <Link 
-                    to={`/stories/${featuredStory.slug}`} 
-                    className="bg-primary hover:bg-secondary text-white text-xs uppercase tracking-wider font-semibold px-5 py-3 rounded-button transition-all"
-                  >
-                    Read Story
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </FadeIn>
-        )}
-      </section>
+      {/* Giant Ghost Text */}
+      <div className="absolute inset-x-0 flex items-center justify-center pointer-events-none select-none z-10" style={{ top: '15%' }}>
+        <h2 className="font-display text-white opacity-20 uppercase whitespace-nowrap leading-none tracking-tight" style={{ fontSize: 'clamp(80px, 25vw, 320px)' }}>
+          EDITIONS
+        </h2>
+      </div>
 
-      {/* Editor's Picks */}
-      <section className="space-y-8">
-        <FadeIn direction="up">
-          <div className="border-b border-border-light pb-4">
-            <h2 className="font-serif text-3xl font-bold text-primary tracking-tight">Editor's Picks</h2>
-          </div>
-        </FadeIn>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {editorsPicks.map((story, i) => (
-            <FadeIn key={story.id} direction="up" delay={i * 0.1}>
-              <StoryCard story={story} />
-            </FadeIn>
-          ))}
-        </div>
-      </section>
+      <div className="absolute top-8 left-6 sm:left-12 z-50">
+        <span className="text-xs font-semibold uppercase text-white/90 tracking-[0.2em] font-sans">
+          The Impact Ledger
+        </span>
+      </div>
 
-      {/* Impact Categories */}
-      <section className="space-y-8">
-        <FadeIn direction="up">
-          <div className="border-b border-border-light pb-4 text-center">
-            <h2 className="font-serif text-3xl font-bold text-primary tracking-tight">Impact Fields</h2>
-            <p className="text-sm text-text-secondary mt-1">Explore articles organized by focus area</p>
-          </div>
-        </FadeIn>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockCategories.map((cat, i) => (
-            <FadeIn key={cat.id} direction="up" delay={i * 0.05}>
-              <Link 
-                to={`/stories?category=${cat.slug}`}
-                className="group bg-surface-pure border border-border-light rounded-card p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[160px] transform hover:-translate-y-0.5"
-              >
-                <div className="space-y-3">
-                  <span className="text-accent text-xs font-semibold uppercase tracking-widest">{cat.name}</span>
-                  <p className="text-xs text-text-secondary leading-relaxed font-sans line-clamp-3">
-                    {cat.description}
-                  </p>
-                </div>
-                <span className="text-xs font-bold text-primary group-hover:text-accent transition-colors flex items-center gap-1.5 self-start mt-4">
-                  Browse Field &rarr;
-                </span>
-              </Link>
-            </FadeIn>
-          ))}
-        </div>
-      </section>
+      {/* Carousel Items */}
+      <div className="absolute inset-0 z-20">
+        {displayIssues.map((issue, i) => {
+          let role = '';
+          if (i === activeIndex) role = 'center';
+          else if (i === (activeIndex + 3) % 4) role = 'left';
+          else if (i === (activeIndex + 1) % 4) role = 'right';
+          else role = 'back';
 
-      {/* Editorial Core Philosophy Banner */}
-      <FadeIn direction="up">
-        <section className="bg-primary text-white rounded-card p-8 md:p-16 text-center space-y-6 shadow-md relative overflow-hidden">
-          <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
-          <span className="text-xs uppercase tracking-widest text-accent font-semibold relative z-10">Our Philosophy</span>
-          <h2 className="text-3.5xl md:text-5xl font-serif font-bold italic max-w-3xl mx-auto leading-tight relative z-10">
-            "Every Impact Deserves to Be Remembered"
-          </h2>
-          <p className="text-sm md:text-base text-gray-300 max-w-xl mx-auto font-sans relative z-10">
-            We believe in recording real, measurable human triumphs to build a permanent registry of positive change for future generations.
-          </p>
-          <div className="pt-4 relative z-10">
-            <Link 
-              to="/about" 
-              className="inline-block bg-accent hover:bg-yellow-600 text-white text-xs uppercase tracking-wider font-semibold px-6 py-3 rounded-button transition-all"
+          const styles: any = {
+            center: { transform: `translateX(-50%) scale(${isMobile ? 1.1 : 1.4})`, filter: 'blur(0px)', opacity: 1, zIndex: 40, left: '50%', height: isMobile ? '55%' : '85%', bottom: isMobile ? '25%' : '0' },
+            left: { transform: `translateX(-50%) scale(0.9)`, filter: 'blur(4px)', opacity: 0.7, zIndex: 30, left: isMobile ? '15%' : '25%', height: isMobile ? '25%' : '40%', bottom: isMobile ? '35%' : '15%' },
+            right: { transform: `translateX(-50%) scale(0.9)`, filter: 'blur(4px)', opacity: 0.7, zIndex: 30, left: isMobile ? '85%' : '75%', height: isMobile ? '25%' : '40%', bottom: isMobile ? '35%' : '15%' },
+            back: { transform: `translateX(-50%) scale(0.8)`, filter: 'blur(8px)', opacity: 0.4, zIndex: 20, left: '50%', height: isMobile ? '20%' : '30%', bottom: isMobile ? '40%' : '20%' },
+          };
+
+          return (
+            <div 
+              key={i} 
+              className="absolute transition-all duration-[650ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+              style={{ ...styles[role], willChange: 'transform, filter, opacity' }}
             >
-              Read Our Vision
+              <img src={issue.coverImage} alt={issue.title} className="w-full h-full object-contain object-bottom drop-shadow-2xl" draggable={false} />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bottom Nav */}
+      <div className="absolute bottom-8 left-6 sm:bottom-16 sm:left-16 z-50 max-w-[320px]">
+        <p className="font-sans font-bold uppercase tracking-widest text-base sm:text-xl text-white/95 mb-3">
+          {displayIssues[activeIndex].title}
+        </p>
+        <p className="hidden sm:block text-sm text-white/80 leading-relaxed mb-6 font-sans">
+          Dive into our latest deep-dives, exclusive interviews, and stunning photojournalism covering grassroots initiatives worldwide.
+        </p>
+        <div className="flex gap-4">
+          <button onClick={() => navigate('prev')} className="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center text-white hover:bg-white/10 transition-colors">
+            <ArrowLeft size={24} />
+          </button>
+          <button onClick={() => navigate('next')} className="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center text-white hover:bg-white/10 transition-colors">
+            <ArrowRight size={24} />
+          </button>
+        </div>
+      </div>
+
+      <div className="absolute bottom-8 right-6 sm:bottom-16 sm:right-16 z-50">
+        <Link to={`/magazine`} className="flex items-center gap-4 text-white hover:opacity-80 transition-opacity font-display text-3xl sm:text-5xl tracking-tight">
+          READ NOW <ArrowRight size={32} />
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+// --- Panel 2 Auto Carousel ---
+const PanelCarousel = () => {
+  const items = [
+    "Exclusive interviews with global NGO leaders.",
+    "Data-driven reports on climate sustainability.",
+    "Community spotlights from emerging markets.",
+    "High-impact photojournalism and editorials."
+  ];
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setIdx(prev => (prev + 1) % items.length), 3500);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="h-full flex flex-col justify-center relative min-h-[200px]">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={idx}
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -15 }}
+          transition={{ duration: 0.5 }}
+          className="text-lg md:text-xl font-sans text-primary/90 leading-relaxed font-medium"
+        >
+          {items[idx]}
+        </motion.div>
+      </AnimatePresence>
+      <div className="flex gap-2 mt-8">
+        {items.map((_, i) => (
+          <div key={i} className={`h-1 flex-1 rounded-full transition-colors duration-500 ${i === idx ? 'bg-primary' : 'bg-primary/20'}`} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default function Home() {
+  const { data: magazineIssues = mockMagazineIssues } = useQuery({ queryKey: ['magazineIssues'], queryFn: () => api.getMagazineIssues() });
+
+  return (
+    <div className="flex flex-col min-h-screen relative overflow-hidden bg-primary text-white">
+      
+      {/* --- HERO SECTION (Style 1 + 2) --- */}
+      <section className="relative h-screen min-h-[700px] flex flex-col justify-center overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/ChatGPT Image Jul 22, 2026, 03_34_46 PM.png" 
+            alt="Hero Background" 
+            className="w-full h-full object-cover opacity-80 mix-blend-luminosity scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/30 to-transparent"></div>
+          <div className="absolute inset-0 bg-noise opacity-30 mix-blend-overlay"></div>
+        </div>
+
+        {/* Floating Navbar (Liquid Glass) */}
+        <nav className="absolute top-6 inset-x-4 md:inset-x-12 z-50 flex items-center justify-between">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="liquid-glass rounded-full px-4 py-2 hover:bg-white/10 transition-colors duration-300">
+            <img src="/main%20logo.png" alt="The Impact Ledger" className="h-10 md:h-12 w-auto object-contain" />
+          </motion.div>
+          
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="hidden lg:flex liquid-glass rounded-full px-2 py-2 items-center gap-2">
+            <Link to="/" className="px-4 py-2 text-sm font-medium text-white/80 font-sans hover:text-white hover:bg-white/10 rounded-full transition-all duration-300">Home</Link>
+            <Link to="/stories" className="px-4 py-2 text-sm font-medium text-white/80 font-sans hover:text-white hover:bg-white/10 rounded-full transition-all duration-300">Editorial</Link>
+            <Link to="/magazine" className="px-4 py-2 text-sm font-medium text-white/80 font-sans hover:text-white hover:bg-white/10 rounded-full transition-all duration-300">Magazine</Link>
+            <Link to="/contact" className="px-4 py-2 text-sm font-medium text-white/80 font-sans hover:text-white hover:bg-white/10 rounded-full transition-all duration-300">Contact</Link>
+            <button className="bg-white text-primary px-5 py-2 rounded-full text-sm font-bold ml-2 hover:scale-105 transition-transform duration-300">Subscribe</button>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex gap-4">
+            <button className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center hover:bg-white/20 hover:scale-105 transition-all duration-300"><Search size={20} /></button>
+            <button className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center hover:bg-white/20 hover:scale-105 transition-all duration-300"><Menu size={20} /></button>
+          </motion.div>
+        </nav>
+
+        {/* Hero Content */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-20">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-6 inline-flex items-center gap-3 liquid-glass rounded-full px-4 py-2">
+            <span className="bg-white text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">New</span>
+            <span className="text-sm text-white/90 pr-2 font-sans">Latest Digital Issue Available Now</span>
+          </motion.div>
+
+          <BlurText 
+            text="Documenting Stories That Change The World" 
+            className="text-6xl md:text-8xl lg:text-[7rem] font-heading italic text-white leading-[0.9] tracking-tight max-w-4xl"
+          />
+
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }}
+            className="mt-8 text-lg md:text-xl text-white/80 max-w-2xl font-sans font-light leading-relaxed"
+          >
+            Discover the universe of positive transformation. Our pioneering journalism and breakthrough editorials bring grassroots initiatives within reach—secure and extraordinary.
+          </motion.p>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }} className="mt-10 flex flex-wrap items-center gap-6">
+            <Link to="/stories" className="liquid-glass-strong rounded-full px-8 py-4 text-sm md:text-base font-semibold text-white flex items-center gap-3 hover:bg-white/10 transition-all">
+              Explore Editorial <ArrowUpRight size={20} />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* --- 3D MAGAZINE CAROUSEL (Style 3) --- */}
+      <section className="relative w-full h-screen border-y border-white/10">
+        <MagazineCarousel issues={magazineIssues} />
+      </section>
+
+
+      {/* --- 3-PANEL FOOTER GRID (Style 1) --- */}
+      <section className="grid grid-cols-1 md:grid-cols-[2fr_1fr_2fr] bg-background-warm text-primary min-h-[400px]">
+        {/* Panel 1 */}
+        <div className="bg-[#ECEDEC] p-10 md:p-16 flex flex-col justify-between relative overflow-hidden">
+          <div className="z-10 relative">
+            <h3 className="font-sans font-medium text-3xl md:text-4xl leading-[1.1] tracking-tight max-w-[350px] mb-8">
+              Start your journey into impactful journalism.
+            </h3>
+            <Link to="/subscribe" className="font-sans text-lg underline underline-offset-4 hover:opacity-70 transition-opacity">
+              Subscribe to the Digest
             </Link>
           </div>
-        </section>
-      </FadeIn>
-
-      {/* Featured Magazine Edition */}
-      <section className="space-y-8">
-        <FadeIn direction="up">
-          <div className="border-b border-border-light pb-4">
-            <h2 className="font-serif text-3xl font-bold text-primary tracking-tight">Latest Digital Issue</h2>
-          </div>
-        </FadeIn>
-        {currentMagazine && (
-          <FadeIn direction="up" delay={0.1}>
-            <MagazineCard issue={currentMagazine} />
-          </FadeIn>
-        )}
-      </section>
-
-      {/* Latest Stories Grid */}
-      <section className="space-y-8">
-        <FadeIn direction="up">
-          <div className="border-b border-border-light pb-4 flex justify-between items-end">
-            <h2 className="font-serif text-3xl font-bold text-primary tracking-tight">Latest Publications</h2>
-            <Link to="/stories" className="text-xs font-bold text-accent hover:underline">
-              View All Publications &rarr;
-            </Link>
-          </div>
-        </FadeIn>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {latestStories.map((story, i) => (
-            <FadeIn key={story.id} direction="up" delay={i * 0.1}>
-              <StoryCard story={story} />
-            </FadeIn>
-          ))}
+          <img 
+            src="https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80" 
+            className="absolute right-0 bottom-0 h-full w-2/3 object-cover mix-blend-multiply opacity-20 pointer-events-none"
+            alt="Decorative"
+          />
         </div>
-      </section>
 
-      {/* Spotlight Interview */}
-      <section className="space-y-8">
-        <FadeIn direction="up">
-          <div className="border-b border-border-light pb-4">
-            <h2 className="font-serif text-3xl font-bold text-primary tracking-tight">Spotlight Interview</h2>
-          </div>
-        </FadeIn>
-        {spotlightInterview && (
-          <FadeIn direction="up" delay={0.1}>
-            <InterviewCard interview={spotlightInterview} />
-          </FadeIn>
-        )}
-      </section>
-
-      {/* Featured Organizations */}
-      <section className="space-y-8">
-        <FadeIn direction="up">
-          <div className="border-b border-border-light pb-4 text-center">
-            <h2 className="font-serif text-3xl font-bold text-primary tracking-tight">Featured Collaborators</h2>
-            <p className="text-sm text-text-secondary mt-1">NGOs and corporations enabling active societal impact</p>
-          </div>
-        </FadeIn>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {mockOrganizations.map((org, i) => (
-            <FadeIn key={org.id} direction="up" delay={i * 0.1}>
-              <OrganizationCard org={org} />
-            </FadeIn>
-          ))}
+        {/* Panel 2 */}
+        <div className="bg-[#FEFDF9] p-10 md:p-16">
+          <PanelCarousel />
         </div>
-      </section>
 
-      {/* Impact Statistics */}
-      <FadeIn direction="up">
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-8 bg-surface-pure border border-border-light rounded-card p-8 text-center shadow-sm">
-          <StatCounter value="150+" label="Stories Published" />
-          <StatCounter value="85+" label="NGOs Collaborated" />
-          <StatCounter value="240K+" label="Active Readers" />
-          <StatCounter value="12" label="Digital Volumes" />
-        </section>
-      </FadeIn>
-
-      {/* Community Gallery */}
-      <CommunityGallery />
-
-      {/* Testimonials */}
-      <section className="space-y-8">
-        <FadeIn direction="up">
-          <div className="border-b border-border-light pb-4 text-center">
-            <h2 className="font-serif text-3xl font-bold text-primary tracking-tight">Community Voices</h2>
+        {/* Panel 3 */}
+        <div className="bg-primary text-white p-10 md:p-16 flex items-center gap-8">
+          <div className="w-1/3 aspect-[4/3] overflow-hidden rounded-sm">
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80" alt="Community" className="w-full h-full object-cover grayscale" />
           </div>
-        </FadeIn>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {mockTestimonials.map((t, i) => (
-            <FadeIn key={t.id} direction="up" delay={i * 0.1}>
-              <div className="bg-surface-pure border border-border-light rounded-card p-8 space-y-4 shadow-sm relative h-full">
-                <span className="text-4xl text-accent font-serif absolute top-4 right-6 opacity-30">“</span>
-                <p className="text-sm italic text-text-secondary font-serif leading-relaxed relative z-10">
-                  "{t.quote}"
-                </p>
-                <div className="pt-4 border-t border-border-light">
-                  <p className="text-xs font-bold text-primary">{t.author}</p>
-                  <p className="text-[10px] text-text-secondary">{t.role}, {t.organization}</p>
-                </div>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
-      </section>
-
-      {/* FAQ Preview */}
-      <section className="space-y-8">
-        <FadeIn direction="up">
-          <div className="border-b border-border-light pb-4 text-center">
-            <h2 className="font-serif text-3xl font-bold text-primary tracking-tight">Frequently Asked Questions</h2>
-          </div>
-        </FadeIn>
-        <FAQAccordion items={mockFAQs} />
-      </section>
-
-      {/* Newsletter Signup */}
-      <FadeIn direction="up">
-        <section className="bg-surface-pure border border-border-light rounded-card p-8 md:p-12 shadow-sm text-center max-w-3xl mx-auto space-y-6">
-          <div className="space-y-2">
-            <span className="text-xs uppercase tracking-widest text-accent font-semibold">Stay Informed</span>
-            <h2 className="text-2.5xl md:text-3.5xl font-serif font-bold text-primary">Subscribe to the Impact Digest</h2>
-            <p className="text-sm text-text-secondary max-w-md mx-auto leading-relaxed">
-              Get monthly updates of verified case studies, NGO reports, and premium digital publications directly in your inbox.
+          <div className="flex-1">
+            <h4 className="font-heading italic text-5xl md:text-6xl mb-2">+14K</h4>
+            <p className="text-white/60 font-sans text-lg leading-snug">
+              Readers have already joined the global movement for verified impact.
             </p>
           </div>
-          {subscribed ? (
-            <div className="bg-green-50 text-success-green border border-green-200 rounded-button p-4 text-xs font-semibold animate-fade">
-              ✓ Subscription successful! Welcome to The Impact Ledger family.
-            </div>
-          ) : (
-            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input 
-                type="email" 
-                required
-                placeholder="Your email address" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 bg-background-warm border border-border-light rounded-input px-4 py-3 text-sm focus:outline-none focus:border-accent text-primary placeholder-gray-400"
-              />
-              <button 
-                type="submit" 
-                className="bg-primary hover:bg-secondary text-white text-xs uppercase tracking-wider font-semibold px-6 py-3 rounded-button transition-all whitespace-nowrap"
-              >
-                Subscribe
-              </button>
-            </form>
-          )}
-        </section>
-      </FadeIn>
+        </div>
+      </section>
+
     </div>
   );
 }

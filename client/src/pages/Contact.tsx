@@ -11,6 +11,8 @@ const contactSchema = z.object({
   message: z.string().min(15, 'Message must be at least 15 characters'),
 });
 
+import { api } from '../api';
+
 type ContactFormData = z.infer<typeof contactSchema>;
 
 export default function Contact() {
@@ -21,16 +23,25 @@ export default function Contact() {
     resolver: zodResolver(contactSchema),
   });
 
-  const onSubmit = (data: ContactFormData) => {
+  const onSubmit = async (data: ContactFormData) => {
     setLoading(true);
-    // Simulate API request
-    setTimeout(() => {
-      console.log('Contact form submitted:', data);
-      setLoading(false);
+    try {
+      await api.submitContact({
+        name: data.name,
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
+        type: 'general', // defaults to general from contact form
+      });
       setSuccess(true);
       reset();
       setTimeout(() => setSuccess(false), 8000);
-    }, 1500);
+    } catch (err) {
+      console.error('Error submitting contact request:', err);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

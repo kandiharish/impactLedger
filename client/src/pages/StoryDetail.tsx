@@ -1,75 +1,256 @@
+import React, { useRef } from 'react';
+import type { ReactNode } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { mockStories } from '../data/mockData';
+import { useQuery } from '@tanstack/react-query';
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
+import { ArrowLeft, Share2, BookmarkPlus } from 'lucide-react';
+import { api } from '../api';
 
+// --- 3D Tilt Component ---
+function TiltCard({ children, className = "" }: { children: ReactNode, className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  // Smooth out the motion values for a premium feel
+  const mouseXSpring = useSpring(x, { stiffness: 150, damping: 20 });
+  const mouseYSpring = useSpring(y, { stiffness: 150, damping: 20 });
+
+  // Map mouse position to rotation degrees (subtle: max 5 degrees)
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["5deg", "-5deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-5deg", "5deg"]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    
+    // Calculate mouse position relative to the center of the card (-0.5 to 0.5)
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d"
+      }}
+      className={`perspective-1000 ${className}`}
+    >
+      {/* Optional subtle glare effect could go here */}
+      <div style={{ transform: "translateZ(30px)" }}>
+        {children}
+      </div>
+    </motion.div>
+  );
+}
+
+// --- Main Page Component ---
 export default function StoryDetail() {
   const { slug } = useParams();
-  const story = mockStories.find((s) => s.slug === slug);
+  
+  // Setup Scroll tracking for parallax and progress
+  const { scrollY, scrollYProgress } = useScroll();
+  const heroY = useTransform(scrollY, [0, 1000], [0, 400]);
+  const heroOpacity = useTransform(scrollY, [0, 600], [1, 0]);
+  const heroScale = useTransform(scrollY, [0, 1000], [1, 1.1]);
 
-  if (!story) {
+  const { data: story, isLoading, error } = useQuery({
+    queryKey: ['story', slug],
+    queryFn: () => api.getStoryBySlug(slug || ''),
+    enabled: !!slug
+  });
+
+  if (isLoading) {
     return (
-      <div className="py-24 text-center space-y-4">
-        <h2 className="font-serif text-2xl font-bold text-primary">Story Not Found</h2>
-        <p className="text-text-secondary">The requested article could not be located in our ledger.</p>
-        <Link to="/stories" className="text-accent hover:underline text-sm font-semibold">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-primary">
+        <div className="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (error || !story) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-primary text-white space-y-4">
+        <h2 className="font-heading italic text-4xl">Story Not Found</h2>
+        <Link to="/stories" className="text-white/70 hover:text-white transition-colors">
           &larr; Return to directory
         </Link>
       </div>
     );
   }
 
+  // Split content into paragraphs for staggered reveal
+  const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
+
   return (
-    <article className="max-w-3xl mx-auto space-y-8">
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Link to={`/stories?category=${story.category.toLowerCase()}`} className="text-xs uppercase tracking-widest text-accent font-semibold hover:underline">
-            {story.category}
-          </Link>
-          <span className="w-1 h-1 rounded-full bg-border-light"></span>
-          <span className="text-xs text-text-secondary">{story.publishedDate}</span>
-        </div>
-        <h1 className="text-3.5xl md:text-5xl font-serif font-bold text-primary leading-tight tracking-tight">
-          {story.title}
-        </h1>
-        <p className="text-lg text-text-secondary font-sans leading-relaxed border-l-4 border-accent/40 pl-6 py-1">
-          {story.summary}
-        </p>
-      </div>
-
-      <div className="aspect-video w-full rounded-card overflow-hidden bg-gray-100 shadow-sm">
-        <img 
-          src={story.featuredImage} 
-          alt={story.title} 
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      {/* Author and Reading Time Header */}
-      <div className="border-y border-border-light py-6 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center font-bold text-sm">
-            {story.author.avatar}
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-primary">{story.author.name}</p>
-            <p className="text-xs text-text-secondary">{story.author.role}</p>
-          </div>
-        </div>
-        <span className="text-xs font-sans text-text-secondary uppercase tracking-widest">{story.readingTime}</span>
-      </div>
-
-      {/* Article Content */}
-      <div className="prose max-w-none text-text-primary space-y-6 font-sans text-base md:text-lg leading-relaxed whitespace-pre-line">
-        {story.content}
-      </div>
-
-      <div className="pt-12 border-t border-border-light flex justify-between items-center">
-        <Link to="/stories" className="text-xs font-bold text-accent hover:underline flex items-center gap-1.5">
-          &larr; Back to directory
+    <div className="bg-primary min-h-screen text-white relative">
+      
+      {/* --- Floating Navigation & Progress Bar --- */}
+      <motion.nav 
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.5, type: 'spring' }}
+        className="fixed top-6 inset-x-4 md:inset-x-12 z-50 flex items-center justify-between"
+      >
+        <Link to="/stories" className="liquid-glass rounded-full px-5 py-2 flex items-center gap-2 hover:bg-white/10 transition-colors">
+          <ArrowLeft size={16} />
+          <span className="text-xs font-bold uppercase tracking-widest">Back</span>
         </Link>
-        <Link to="/submit-story" className="text-xs font-bold text-primary hover:underline">
-          Have an impact story to share? Submit here &rarr;
-        </Link>
+        <div className="flex items-center gap-3">
+          <button className="liquid-glass w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"><Share2 size={16} /></button>
+          <button className="liquid-glass w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"><BookmarkPlus size={16} /></button>
+        </div>
+      </motion.nav>
+
+      {/* Progress Bar at very top edge */}
+      <motion.div 
+        className="fixed top-0 left-0 right-0 h-1 bg-accent z-50 origin-left"
+        style={{ scaleX: scrollYProgress }}
+      />
+
+      {/* --- Cinematic Parallax Hero --- */}
+      <div className="relative h-screen w-full overflow-hidden flex flex-col justify-end">
+        <motion.div 
+          className="absolute inset-0 z-0 origin-bottom"
+          style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
+        >
+          <img 
+            src={story.featuredImage} 
+            alt={story.title} 
+            className="w-full h-full object-cover"
+          />
+          {/* Heavy gradient to ensure text is perfectly readable */}
+          <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-transparent"></div>
+          <div className="absolute inset-0 bg-noise opacity-20 mix-blend-overlay"></div>
+        </motion.div>
+
+        {/* Hero Text */}
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-6 md:px-12 pb-24 md:pb-32 text-center">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 1 }}
+            className="space-y-6"
+          >
+            <span className="text-accent text-xs font-bold uppercase tracking-widest drop-shadow-md">
+              {story.category} • {story.publishedDate}
+            </span>
+            <h1 className="text-5xl md:text-7xl lg:text-[6rem] font-heading italic leading-[0.9] tracking-tight">
+              {story.title}
+            </h1>
+            <p className="text-lg md:text-xl text-white/80 font-sans font-light max-w-2xl mx-auto leading-relaxed">
+              {story.summary}
+            </p>
+          </motion.div>
+        </div>
       </div>
-    </article>
+
+      {/* --- Article Content (Realtime Staggered Reveal) --- */}
+      <article className="relative z-20 bg-primary w-full max-w-3xl mx-auto px-6 md:px-0 py-20">
+        
+        {/* Author Block (3D Tilt) */}
+        <TiltCard className="mb-16 -mt-32 relative z-30 w-full max-w-sm mx-auto">
+          <div className="liquid-glass-strong rounded-3xl p-6 flex items-center gap-4 border border-white/10 shadow-2xl">
+            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-primary font-heading text-2xl">
+              {story.author.avatar}
+            </div>
+            <div>
+              <p className="text-sm text-white/60 font-sans tracking-widest uppercase mb-1">Words By</p>
+              <p className="text-xl font-heading text-white">{story.author.name}</p>
+              <p className="text-xs text-accent font-sans">{story.author.role}</p>
+            </div>
+          </div>
+        </TiltCard>
+
+        {/* Dynamic Text Blocks */}
+        <div className="space-y-12">
+          {paragraphs.map((paragraph, index) => {
+            // First paragraph styling (Drop Cap)
+            if (index === 0) {
+              return (
+                <motion.p 
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.8 }}
+                  className="text-xl md:text-2xl text-white/90 font-sans font-light leading-relaxed first-letter:text-7xl first-letter:font-heading first-letter:italic first-letter:text-accent first-letter:float-left first-letter:mr-4 first-letter:-mt-2"
+                >
+                  {paragraph}
+                </motion.p>
+              );
+            }
+
+            // Pseudo-randomly inject a 3D blockquote styling for variety if it's the 3rd paragraph (just for demonstration of editorial style)
+            if (index === 2 && paragraphs.length > 3) {
+              return (
+                <TiltCard key={index} className="my-16">
+                  <motion.blockquote
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.8 }}
+                    className="border-l-4 border-accent pl-8 py-2"
+                  >
+                    <p className="text-3xl md:text-4xl font-heading italic text-white leading-tight">
+                      "{paragraph}"
+                    </p>
+                  </motion.blockquote>
+                </TiltCard>
+              );
+            }
+
+            // Standard Paragraph
+            return (
+              <motion.p 
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8 }}
+                className="text-lg md:text-xl text-white/80 font-sans font-light leading-relaxed"
+              >
+                {paragraph}
+              </motion.p>
+            );
+          })}
+        </div>
+
+        {/* End of Article */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="mt-24 pt-12 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6"
+        >
+          <p className="text-xs text-white/50 uppercase tracking-widest font-sans">
+            Published {story.publishedDate} • {story.readingTime}
+          </p>
+          <div className="flex gap-4">
+            <Link to="/stories" className="liquid-glass rounded-full px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-colors">
+              Next Story &rarr;
+            </Link>
+          </div>
+        </motion.div>
+      </article>
+
+    </div>
   );
 }

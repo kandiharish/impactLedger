@@ -5,38 +5,34 @@ export default function StoryCard({ story }: { story: Story }) {
   return (
     <Link 
       to={`/stories/${story.slug}`} 
-      className="group flex flex-col bg-surface-pure border border-border-light rounded-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
+      className="group flex flex-col overflow-hidden transition-all duration-300"
     >
-      <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+      <div className="relative aspect-video w-full bg-gray-100 border border-gray-200">
         <img 
           src={story.featuredImage} 
           alt={story.title} 
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
-        <div className="absolute top-4 left-4 bg-primary text-white text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full">
+        <div className="absolute top-0 left-0 bg-primary text-white text-[10px] uppercase font-bold tracking-widest px-3 py-1">
           {story.category}
         </div>
       </div>
-      <div className="flex flex-col flex-1 p-6 space-y-3">
-        <div className="flex items-center gap-2 text-xs text-text-secondary">
+      <div className="flex flex-col flex-1 pt-4 space-y-2">
+        <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-gray-500 tracking-widest">
           <span>{story.publishedDate}</span>
-          <span className="w-1 h-1 rounded-full bg-border-light"></span>
+          <span className="w-1 h-1 bg-accent"></span>
           <span>{story.readingTime}</span>
         </div>
-        <h3 className="font-serif text-xl font-bold text-primary group-hover:text-accent transition-colors leading-tight">
+        <h3 className="font-serif text-2xl font-bold text-primary group-hover:text-accent transition-colors leading-tight">
           {story.title}
         </h3>
-        <p className="text-sm text-text-secondary line-clamp-3 font-sans leading-relaxed">
+        <p className="text-xs text-text-secondary line-clamp-3 font-sans leading-relaxed">
           {story.summary}
         </p>
-        <div className="pt-4 mt-auto border-t border-border-light flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-bold text-xs">
-            {story.author.avatar}
-          </div>
+        <div className="pt-4 mt-auto border-t border-gray-200 flex items-center gap-3">
           <div>
-            <p className="text-xs font-semibold text-primary">{story.author.name}</p>
-            <p className="text-[10px] text-text-secondary">{story.author.role}</p>
+            <p className="text-[10px] font-bold text-primary uppercase tracking-widest">By {story.author.name}</p>
           </div>
         </div>
       </div>

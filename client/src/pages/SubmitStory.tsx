@@ -13,6 +13,8 @@ const submissionSchema = z.object({
   impactMetrics: z.string().min(10, 'Describe the impact metrics (minimum 10 characters)'),
 });
 
+import { api } from '../api';
+
 type SubmissionFormData = z.infer<typeof submissionSchema>;
 
 export default function SubmitStory() {
@@ -23,15 +25,19 @@ export default function SubmitStory() {
     resolver: zodResolver(submissionSchema),
   });
 
-  const onSubmit = (data: SubmissionFormData) => {
+  const onSubmit = async (data: SubmissionFormData) => {
     setLoading(true);
-    setTimeout(() => {
-      console.log('Story submission received:', data);
-      setLoading(false);
+    try {
+      await api.submitStory(data);
       setSuccess(true);
       reset();
       setTimeout(() => setSuccess(false), 8000);
-    }, 1500);
+    } catch (err) {
+      console.error('Error submitting story draft:', err);
+      alert('Failed to submit draft report. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

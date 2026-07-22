@@ -3,11 +3,19 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import apiRoutes from './routes';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Connect to MongoDB
+const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/impactledger';
+mongoose.connect(mongoUri)
+  .then(() => console.log('Successfully connected to MongoDB.'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
 // Security Middleware
 app.use(helmet());
@@ -24,6 +32,9 @@ const limiter = rateLimit({
   max: 100 // limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
+
+// API Routes
+app.use('/api', apiRoutes);
 
 // Health Check Route
 app.get('/api/health', (req, res) => {
@@ -46,3 +57,4 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
