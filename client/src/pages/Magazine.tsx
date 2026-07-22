@@ -1,11 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Search, Menu, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { BookOpen, Flame } from 'lucide-react';
 import { api } from '../api';
 
-// --- 3D Magazine Cover Component ---
+// --- 3D Magazine Cover Component (For Spotlight) ---
 function Magazine3DCover({ image, title }: { image: string, title: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
@@ -17,21 +17,14 @@ function Magazine3DCover({ image, title }: { image: string, title: string }) {
   const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["15deg", "-15deg"]);
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-15deg", "15deg"]);
   
-  // Dynamic glare effect based on mouse position
   const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ["100%", "-100%"]);
   const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ["100%", "-100%"]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!ref.current) return;
     const rect = ref.current.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    
-    x.set(mouseX / width - 0.5);
-    y.set(mouseY / height - 0.5);
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
   };
 
   const handleMouseLeave = () => {
@@ -44,12 +37,8 @@ function Magazine3DCover({ image, title }: { image: string, title: string }) {
       ref={ref}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={{
-        rotateX,
-        rotateY,
-        transformStyle: "preserve-3d"
-      }}
-      className="relative w-[280px] md:w-[400px] aspect-[3/4] cursor-pointer perspective-1000 mx-auto"
+      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      className="relative w-full max-w-sm aspect-[3/4] cursor-pointer perspective-1000 mx-auto"
     >
       <motion.div 
         className="w-full h-full relative rounded-r-lg rounded-l-sm overflow-hidden"
@@ -58,14 +47,9 @@ function Magazine3DCover({ image, title }: { image: string, title: string }) {
           transform: "translateZ(30px)"
         }}
       >
-        {/* Magazine Cover Image */}
-        <img src={image} alt={title} className="w-full h-full object-cover" />
-        
-        {/* Paper Thickness/Spine effect */}
+        <img src={image} alt={title} className="w-full h-full object-cover filter sepia-[0.3] contrast-125 mix-blend-luminosity" />
         <div className="absolute top-0 bottom-0 left-0 w-3 bg-gradient-to-r from-black/60 to-transparent mix-blend-multiply"></div>
         <div className="absolute top-0 bottom-0 left-0 w-[2px] bg-white/30"></div>
-
-        {/* Dynamic Glare */}
         <motion.div 
           className="absolute inset-0 z-10 pointer-events-none"
           style={{
@@ -79,24 +63,37 @@ function Magazine3DCover({ image, title }: { image: string, title: string }) {
   );
 }
 
-// --- Main Magazine Archive Component ---
-export default function Magazine() {
-  const [activeIndex, setActiveIndex] = useState(0);
+// --- Small Interactive Card (For Pulse & Vault) ---
+function MiniIssueCard({ issue }: { issue: any }) {
+  return (
+    <motion.div 
+      whileHover={{ y: -10 }}
+      className="group flex flex-col gap-4 cursor-pointer w-[200px] shrink-0"
+    >
+      <div className="relative aspect-[3/4] rounded-r-md rounded-l-sm overflow-hidden shadow-xl transition-shadow group-hover:shadow-2xl">
+        <img src={issue.coverImage} alt={issue.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 filter sepia-[0.3] contrast-125 mix-blend-luminosity" />
+        <div className="absolute top-0 bottom-0 left-0 w-2 bg-gradient-to-r from-black/50 to-transparent mix-blend-multiply"></div>
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
+          <span className="text-white font-bold tracking-widest text-xs uppercase border border-white/50 px-4 py-2 rounded-full">
+            Read
+          </span>
+        </div>
+      </div>
+      <div>
+        <p className="text-accent text-[10px] font-bold uppercase tracking-widest mb-1">{issue.issueNumber} • {issue.month} {issue.year}</p>
+        <h3 className="text-lg font-heading text-white leading-tight group-hover:text-accent transition-colors">{issue.title}</h3>
+      </div>
+    </motion.div>
+  );
+}
 
+// --- Main Magazine Newsstand Component ---
+export default function Magazine() {
   const { data: issues = [], isLoading, isError } = useQuery({
     queryKey: ['magazineIssues'],
     queryFn: () => api.getMagazineIssues()
   });
-
-  // Define ambient background colors corresponding to issues
-  const ambientColors = [
-    '#0A192F', // Navy/Teal
-    '#2A1B18', // Deep Warm
-    '#1A2518', // Forest Green
-    '#1A1A24', // Deep Purple
-  ];
-
-  const currentAmbientColor = ambientColors[activeIndex % ambientColors.length];
 
   if (isLoading) {
     return (
@@ -106,162 +103,151 @@ export default function Magazine() {
     );
   }
 
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-primary text-white space-y-4">
-        <h2 className="text-3xl font-heading text-red-400">Unable to load magazine archive.</h2>
-        <p className="text-white/60">Please ensure the backend API is running.</p>
-        <Link to="/" className="text-accent hover:underline">Return Home</Link>
-      </div>
-    );
-  }
-
-  if (!issues || issues.length === 0) {
+  if (isError || !issues || issues.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-primary text-white space-y-4">
-        <h2 className="text-3xl font-heading">No issues found.</h2>
+        <h2 className="text-3xl font-heading text-red-400">Unable to load newsstand.</h2>
         <Link to="/" className="text-accent hover:underline">Return Home</Link>
       </div>
     );
   }
 
-  const activeIssue = issues[activeIndex];
-
-  if (!activeIssue) return null;
-
-  const nextIssue = () => {
-    setActiveIndex((prev) => (prev + 1) % issues.length);
-  };
-
-  const prevIssue = () => {
-    setActiveIndex((prev) => (prev - 1 + issues.length) % issues.length);
-  };
+  // Segment the data
+  const latestIssue = issues[0];
+  const pulseIssues = issues.filter(i => i.isTrending || i.isMostRead);
+  const archivalIssues = issues.slice(1); // Everything except the latest
 
   return (
-    <motion.div 
-      animate={{ backgroundColor: currentAmbientColor }}
-      transition={{ duration: 1.5, ease: "easeInOut" }}
-      className="flex flex-col min-h-screen relative overflow-hidden text-white"
-    >
-      {/* Background Noise Texture */}
-      <div className="absolute inset-0 bg-noise opacity-20 mix-blend-overlay pointer-events-none z-0"></div>
+    <div className="flex flex-col min-h-screen relative bg-white text-gray-900">
+      
+      {/* Fixed Background Image */}
+      <div className="fixed inset-0 z-0 bg-white">
+        <img 
+          src="/magazine%20bg.png" 
+          alt="Newsstand Background" 
+          className="w-full h-full object-cover opacity-60" 
+        />
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px]"></div>
+      </div>
 
-      {/* Floating Navbar (Liquid Glass) */}
-      <nav className="absolute top-6 inset-x-4 md:inset-x-12 z-50 flex items-center justify-between">
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="liquid-glass rounded-full px-4 py-2 hover:bg-white/10 transition-colors duration-300">
-          <Link to="/">
-            <img src="/main%20logo.png" alt="The Impact Ledger" className="h-10 md:h-12 w-auto object-contain" />
-          </Link>
-        </motion.div>
+      {/* Fixed Navbar (Floating Glass Pill - Logo on left without BG, Links inside glassy pill on right) */}
+      <nav className="fixed top-6 inset-x-4 md:inset-x-12 z-50 flex items-center justify-between pointer-events-none">
+        <Link to="/" className="pointer-events-auto">
+          <img src="/main%20logo.png" alt="The Impact Ledger" className="h-10 md:h-12 w-auto object-contain" />
+        </Link>
         
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="hidden lg:flex liquid-glass rounded-full px-2 py-2 items-center gap-2">
-          <Link to="/" className="px-4 py-2 text-sm font-medium text-white/80 font-sans hover:text-white hover:bg-white/10 rounded-full transition-all duration-300">Home</Link>
-          <Link to="/stories" className="px-4 py-2 text-sm font-medium text-white/80 font-sans hover:text-white hover:bg-white/10 rounded-full transition-all duration-300">Editorial</Link>
-          <Link to="/magazine" className="px-4 py-2 text-sm font-medium text-white font-sans bg-white/10 rounded-full transition-all duration-300">Magazine</Link>
-          <Link to="/contact" className="px-4 py-2 text-sm font-medium text-white/80 font-sans hover:text-white hover:bg-white/10 rounded-full transition-all duration-300">Contact</Link>
-          <button className="bg-white text-primary px-5 py-2 rounded-full text-sm font-bold ml-2 hover:scale-105 transition-transform duration-300">Subscribe</button>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex gap-4">
-          <button className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center hover:bg-white/20 hover:scale-105 transition-all duration-300"><Search size={20} className="text-white" /></button>
-          <button className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center hover:bg-white/20 hover:scale-105 transition-all duration-300"><Menu size={20} className="text-white" /></button>
-        </motion.div>
+        <div className="pointer-events-auto flex items-center gap-1 md:gap-2 bg-white/70 backdrop-blur-md border border-gray-200/50 rounded-full px-6 py-2.5 shadow-md">
+          <Link to="/" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Home</Link>
+          <Link to="/about" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">About Us</Link>
+          <Link to="/stories" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Stories</Link>
+          <Link to="/magazine" className="px-3 py-1.5 text-xs font-bold text-accent font-sans bg-white/40 shadow-sm rounded-full transition-all duration-300">Magazine</Link>
+          <Link to="/stories" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Editorial</Link>
+          <Link to="/contact" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Contact Us</Link>
+          <Link to="/submit-story" className="hidden sm:inline-block bg-accent text-white px-5 py-2 rounded-full text-xs font-bold ml-2 hover:bg-[#B3936B] transition-colors shadow-sm">Submit Story</Link>
+        </div>
       </nav>
 
-      {/* Main 3D Carousel Layout */}
-      <div className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center justify-center gap-12 lg:gap-24 pt-32 pb-24">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-32 pb-24 space-y-32">
         
-        {/* Left Side: 3D Floating Cover */}
-        <div className="w-full md:w-1/2 flex items-center justify-center">
-          <AnimatePresence mode="wait">
+        {/* --- 1. The Spotlight (Latest Issue) --- */}
+        <section className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
+          <div className="w-full lg:w-1/2 flex justify-center">
             <motion.div
-              key={activeIssue._id || activeIssue.id}
-              initial={{ opacity: 0, scale: 0.8, x: -50 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.8, x: 50 }}
-              transition={{ duration: 0.6, type: "spring", bounce: 0.2 }}
+              initial={{ opacity: 0, scale: 0.9, rotateY: 20 }}
+              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+              transition={{ duration: 0.8, type: "spring" }}
             >
-              <Magazine3DCover image={activeIssue.coverImage} title={activeIssue.title} />
+              <Magazine3DCover image={latestIssue.coverImage} title={latestIssue.title} />
             </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* Right Side: Issue Details & Interactive TOC */}
-        <div className="w-full md:w-1/2 flex flex-col justify-center">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeIssue._id || activeIssue.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="space-y-8"
-            >
-              <div className="space-y-4">
-                <p className="text-accent text-sm font-bold uppercase tracking-widest flex items-center gap-3">
-                  <span className="w-8 h-[1px] bg-accent"></span>
-                  {activeIssue.issueNumber} • {activeIssue.month} {activeIssue.year}
-                </p>
-                <h1 className="text-5xl lg:text-7xl font-heading italic leading-none tracking-tight">
-                  {activeIssue.title}
-                </h1>
-                <p className="text-lg text-white/70 font-sans font-light leading-relaxed max-w-md">
-                  {activeIssue.editorsNote}
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-4 pt-2">
-                <button className="bg-white text-primary hover:bg-white/90 px-8 py-3 rounded-full text-sm font-bold flex items-center gap-2 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
-                  <BookOpen size={18} />
-                  Read Magazine
-                </button>
-              </div>
-
-              {/* Interactive Table of Contents */}
-              <div className="pt-8 border-t border-white/10">
-                <h3 className="text-xs uppercase tracking-widest text-white/50 mb-6 font-bold">In This Issue</h3>
-                <div className="space-y-4">
-                  {(activeIssue.featuredArticles || []).map((article, idx) => (
-                    <motion.div 
-                      key={idx}
-                      whileHover={{ x: 10 }}
-                      className="group flex items-center justify-between cursor-pointer border-b border-white/5 pb-3"
-                    >
-                      <span className="text-lg font-heading text-white/80 group-hover:text-accent transition-colors duration-300">
-                        {article}
-                      </span>
-                      <span className="text-xs font-sans text-white/40 group-hover:text-white/80 transition-colors duration-300">
-                        Pg {12 + (idx * 16)}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Carousel Controls */}
-          <div className="flex items-center gap-6 pt-12">
-            <button 
-              onClick={prevIssue}
-              className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center hover:bg-white/20 transition-all hover:-translate-x-1"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <div className="text-xs font-bold tracking-widest uppercase text-white/50">
-              {activeIndex + 1} / {issues.length}
-            </div>
-            <button 
-              onClick={nextIssue}
-              className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center hover:bg-white/20 transition-all hover:translate-x-1"
-            >
-              <ChevronRight size={20} />
-            </button>
           </div>
 
-        </div>
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="w-full lg:w-1/2 space-y-8"
+          >
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/50 text-accent text-xs font-bold uppercase tracking-widest">
+                <Flame size={14} className="animate-pulse" /> Latest Release
+              </div>
+              <h1 className="text-5xl md:text-7xl font-heading italic text-gray-900 leading-none tracking-tight">
+                {latestIssue.title}
+              </h1>
+              <p className="text-xl text-gray-600 font-sans font-light leading-relaxed">
+                {latestIssue.editorsNote}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button className="bg-gray-950 text-white hover:bg-gray-800 px-8 py-3 rounded-full text-sm font-bold flex items-center gap-2 hover:scale-105 transition-all duration-300">
+                <BookOpen size={18} />
+                Read Issue
+              </button>
+            </div>
+
+            <div className="pt-8 border-t border-gray-200">
+              <h3 className="text-xs uppercase tracking-widest text-gray-400 mb-4 font-bold">Featured Inside</h3>
+              <ul className="space-y-2">
+                {(latestIssue.featuredArticles || []).map((article, idx) => (
+                  <li key={idx} className="text-gray-700 font-heading text-lg">
+                    • {article}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* --- 2. The Pulse (Trending Scroll) --- */}
+        {pulseIssues.length > 0 && (
+          <section className="space-y-8">
+            <div className="flex items-center gap-3">
+              <h2 className="text-3xl font-heading text-gray-900">The Pulse</h2>
+              <span className="text-gray-400 font-sans text-sm">/ Most Read This Week</span>
+            </div>
+            
+            <div className="flex overflow-x-auto gap-8 pb-8 scrollbar-hide snap-x">
+              {pulseIssues.map((issue) => (
+                <div key={issue.id || issue._id} className="snap-start">
+                  <MiniIssueCard issue={issue} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* --- 3. The Archival Vault --- */}
+        <section className="space-y-8 border-t border-gray-200 pt-16">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <h2 className="text-3xl font-heading text-gray-900">The Vault</h2>
+              <span className="text-gray-400 font-sans text-sm">/ Past Editions</span>
+            </div>
+            {/* Simple Vault Filter */}
+            <div className="flex gap-4">
+              <button className="text-sm font-bold tracking-widest uppercase text-gray-900 border-b-2 border-accent pb-1">All</button>
+              <button className="text-sm font-bold tracking-widest uppercase text-gray-400 hover:text-gray-600 transition-colors">2026</button>
+              <button className="text-sm font-bold tracking-widest uppercase text-gray-400 hover:text-gray-600 transition-colors">2025</button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 lg:gap-12 pt-8">
+            {archivalIssues.map((issue) => (
+              <motion.div 
+                key={issue.id || issue._id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5 }}
+              >
+                <MiniIssueCard issue={issue} />
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
-import { ArrowLeft, Share2, BookmarkPlus } from 'lucide-react';
+// Unused imports removed
 import { api } from '../api';
 
 // --- 3D Tilt Component ---
@@ -100,24 +100,24 @@ export default function StoryDetail() {
   const paragraphs = story.content.split('\n').filter(p => p.trim() !== '');
 
   return (
-    <div className="bg-primary min-h-screen text-white relative">
+    <div className="bg-white min-h-screen text-gray-900 relative">
       
-      {/* --- Floating Navigation & Progress Bar --- */}
-      <motion.nav 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ delay: 0.5, type: 'spring' }}
-        className="fixed top-6 inset-x-4 md:inset-x-12 z-50 flex items-center justify-between"
-      >
-        <Link to="/stories" className="liquid-glass rounded-full px-5 py-2 flex items-center gap-2 hover:bg-white/10 transition-colors">
-          <ArrowLeft size={16} />
-          <span className="text-xs font-bold uppercase tracking-widest">Back</span>
+      {/* Fixed Navbar (Floating Glass Pill - Logo on left without BG, Links inside glassy pill on right) */}
+      <nav className="fixed top-6 inset-x-4 md:inset-x-12 z-50 flex items-center justify-between pointer-events-none">
+        <Link to="/" className="pointer-events-auto">
+          <img src="/main%20logo.png" alt="The Impact Ledger" className="h-10 md:h-12 w-auto object-contain" />
         </Link>
-        <div className="flex items-center gap-3">
-          <button className="liquid-glass w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"><Share2 size={16} /></button>
-          <button className="liquid-glass w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"><BookmarkPlus size={16} /></button>
+        
+        <div className="pointer-events-auto flex items-center gap-1 md:gap-2 bg-white/70 backdrop-blur-md border border-gray-200/50 rounded-full px-6 py-2.5 shadow-md">
+          <Link to="/" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Home</Link>
+          <Link to="/about" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">About Us</Link>
+          <Link to="/stories" className="px-3 py-1.5 text-xs font-bold text-accent font-sans bg-white/40 shadow-sm rounded-full transition-all duration-300">Stories</Link>
+          <Link to="/magazine" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Magazine</Link>
+          <Link to="/stories" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Editorial</Link>
+          <Link to="/contact" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Contact Us</Link>
+          <Link to="/submit-story" className="hidden sm:inline-block bg-accent text-white px-5 py-2 rounded-full text-xs font-bold ml-2 hover:bg-[#B3936B] transition-colors shadow-sm">Submit Story</Link>
         </div>
-      </motion.nav>
+      </nav>
 
       {/* Progress Bar at very top edge */}
       <motion.div 
@@ -126,7 +126,7 @@ export default function StoryDetail() {
       />
 
       {/* --- Cinematic Parallax Hero --- */}
-      <div className="relative h-screen w-full overflow-hidden flex flex-col justify-end">
+      <div className="relative h-[calc(100vh-96px)] w-full overflow-hidden flex flex-col justify-end">
         <motion.div 
           className="absolute inset-0 z-0 origin-bottom"
           style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
@@ -136,8 +136,8 @@ export default function StoryDetail() {
             alt={story.title} 
             className="w-full h-full object-cover"
           />
-          {/* Heavy gradient to ensure text is perfectly readable */}
-          <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/80 to-transparent"></div>
+          {/* Heavy gradient to ensure text is perfectly readable - kept dark for editorial feel */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-transparent"></div>
           <div className="absolute inset-0 bg-noise opacity-20 mix-blend-overlay"></div>
         </motion.div>
 
@@ -152,10 +152,10 @@ export default function StoryDetail() {
             <span className="text-accent text-xs font-bold uppercase tracking-widest drop-shadow-md">
               {story.category} • {story.publishedDate}
             </span>
-            <h1 className="text-5xl md:text-7xl lg:text-[6rem] font-heading italic leading-[0.9] tracking-tight">
+            <h1 className="text-5xl md:text-7xl lg:text-[6rem] font-heading italic leading-[0.9] tracking-tight text-white">
               {story.title}
             </h1>
-            <p className="text-lg md:text-xl text-white/80 font-sans font-light max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl text-white/90 font-sans font-light max-w-2xl mx-auto leading-relaxed">
               {story.summary}
             </p>
           </motion.div>
@@ -163,24 +163,24 @@ export default function StoryDetail() {
       </div>
 
       {/* --- Article Content (Realtime Staggered Reveal) --- */}
-      <article className="relative z-20 bg-primary w-full max-w-3xl mx-auto px-6 md:px-0 py-20">
+      <article className="relative z-20 bg-white w-full max-w-3xl mx-auto px-6 md:px-0 py-20">
         
         {/* Author Block (3D Tilt) */}
         <TiltCard className="mb-16 -mt-32 relative z-30 w-full max-w-sm mx-auto">
-          <div className="liquid-glass-strong rounded-3xl p-6 flex items-center gap-4 border border-white/10 shadow-2xl">
-            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-primary font-heading text-2xl">
+          <div className="bg-[#FAF9F6] border border-gray-200 rounded-3xl p-6 flex items-center gap-4 shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-white font-heading text-2xl">
               {story.author.avatar}
             </div>
             <div>
-              <p className="text-sm text-white/60 font-sans tracking-widest uppercase mb-1">Words By</p>
-              <p className="text-xl font-heading text-white">{story.author.name}</p>
+              <p className="text-sm text-gray-500 font-sans tracking-widest uppercase mb-1">Words By</p>
+              <p className="text-xl font-heading text-gray-900">{story.author.name}</p>
               <p className="text-xs text-accent font-sans">{story.author.role}</p>
             </div>
           </div>
         </TiltCard>
 
         {/* Dynamic Text Blocks */}
-        <div className="space-y-12">
+        <div className="space-y-12 text-gray-800">
           {paragraphs.map((paragraph, index) => {
             // First paragraph styling (Drop Cap)
             if (index === 0) {
@@ -191,7 +191,7 @@ export default function StoryDetail() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.8 }}
-                  className="text-xl md:text-2xl text-white/90 font-sans font-light leading-relaxed first-letter:text-7xl first-letter:font-heading first-letter:italic first-letter:text-accent first-letter:float-left first-letter:mr-4 first-letter:-mt-2"
+                  className="text-xl md:text-2xl text-gray-800 font-sans font-light leading-relaxed first-letter:text-7xl first-letter:font-heading first-letter:italic first-letter:text-accent first-letter:float-left first-letter:mr-4 first-letter:-mt-2"
                 >
                   {paragraph}
                 </motion.p>
@@ -209,7 +209,7 @@ export default function StoryDetail() {
                     transition={{ duration: 0.8 }}
                     className="border-l-4 border-accent pl-8 py-2"
                   >
-                    <p className="text-3xl md:text-4xl font-heading italic text-white leading-tight">
+                    <p className="text-3xl md:text-4xl font-heading italic text-gray-900 leading-tight">
                       "{paragraph}"
                     </p>
                   </motion.blockquote>
@@ -225,7 +225,7 @@ export default function StoryDetail() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.8 }}
-                className="text-lg md:text-xl text-white/80 font-sans font-light leading-relaxed"
+                className="text-lg md:text-xl text-gray-700 font-sans font-light leading-relaxed"
               >
                 {paragraph}
               </motion.p>
@@ -238,13 +238,13 @@ export default function StoryDetail() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="mt-24 pt-12 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6"
+          className="mt-24 pt-12 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-6"
         >
-          <p className="text-xs text-white/50 uppercase tracking-widest font-sans">
+          <p className="text-xs text-gray-500 uppercase tracking-widest font-sans">
             Published {story.publishedDate} • {story.readingTime}
           </p>
           <div className="flex gap-4">
-            <Link to="/stories" className="liquid-glass rounded-full px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-colors">
+            <Link to="/stories" className="bg-[#FAF9F6] border border-gray-200 rounded-full px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors text-gray-800">
               Next Story &rarr;
             </Link>
           </div>

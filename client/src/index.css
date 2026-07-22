@@ -6,22 +6,22 @@
   --font-heading: 'Instrument Serif', serif;
   --font-display: 'Anton', sans-serif;
 
-  --color-primary: #0F172A;
-  --color-secondary: #334155;
-  --color-accent: #D4A017;
-  --color-background-warm: #FAFAF8;
+  --color-primary: #FAF9F6;
+  --color-secondary: #F3F4F6;
+  --color-accent: #C5A880;
+  --color-background-warm: #FAF9F6;
   --color-surface-pure: #FFFFFF;
-  --color-border-light: #E5E7EB;
+  --color-border-light: #E5D5C0;
   --color-text-primary: #111827;
-  --color-text-secondary: #6B7280;
+  --color-text-secondary: #4B5563;
   --color-success-green: #16A34A;
-  --color-warning-amber: #F59E0B;
+  --color-warning-amber: #D4AF37;
   --color-error-red: #DC2626;
 
-  --radius-button: 2px;
-  --radius-card: 0px;
-  --radius-input: 2px;
-  --radius-image: 0px;
+  --radius-button: 9999px;
+  --radius-card: 16px;
+  --radius-input: 8px;
+  --radius-image: 12px;
 }
 
 /* Custom Base Styles */

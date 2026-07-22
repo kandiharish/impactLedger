@@ -37,7 +37,9 @@ export interface MagazineIssue {
   year: string;
   coverImage: string;
   editorsNote: string;
-  featuredArticles: string[]; // Story titles
+  featuredArticles: string[];
+  isTrending?: boolean;
+  isMostRead?: boolean;
 }
 
 export interface Organization {
@@ -262,12 +264,78 @@ export const mockMagazineIssues: MagazineIssue[] = [
     id: 'mag2',
     issueNumber: 'Vol. 11',
     title: 'Bridges of Empowerment',
-    month: 'March',
+    month: 'May',
     year: '2026',
     coverImage: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=600&q=80',
     editorsNote: 'Empowerment begins with agency. This issue celebrates the women-led cooperatives and educational reforms breaking generational cycle barriers across developing regions.',
     featuredArticles: [
       'Weaving Independence: The Loom Revolution of Barmer'
+    ],
+    isTrending: true
+  },
+  {
+    id: 'mag3',
+    issueNumber: 'Vol. 10',
+    title: 'Digital Horizons',
+    month: 'April',
+    year: '2026',
+    coverImage: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80',
+    editorsNote: 'Exploring how technology and internet access are democratizing education in the most remote corners of the world.',
+    featuredArticles: [
+      'Coding in the Desert',
+      'Satellites for Schools'
+    ],
+    isMostRead: true
+  },
+  {
+    id: 'mag4',
+    issueNumber: 'Vol. 9',
+    title: 'Healing Hands',
+    month: 'March',
+    year: '2026',
+    coverImage: 'https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=600&q=80',
+    editorsNote: 'A deep dive into the heroic efforts of mobile medical units and off-grid healthcare workers during the peak of the monsoon floods.',
+    featuredArticles: [
+      'The Boat Clinics of Assam',
+      'Vaccines on Foot'
+    ],
+    isTrending: true
+  },
+  {
+    id: 'mag5',
+    issueNumber: 'Vol. 8',
+    title: 'Corporate Consciousness',
+    month: 'February',
+    year: '2026',
+    coverImage: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=600&q=80',
+    editorsNote: 'When profits meet purpose. We investigate the CSR initiatives that are actually moving the needle, rather than just ticking boxes.',
+    featuredArticles: [
+      'The New Boardroom Agenda'
+    ]
+  },
+  {
+    id: 'mag6',
+    issueNumber: 'Vol. 7',
+    title: 'Seeds of Change',
+    month: 'January',
+    year: '2026',
+    coverImage: 'https://images.unsplash.com/photo-1592621385612-4d7129426394?auto=format&fit=crop&w=600&q=80',
+    editorsNote: 'Agriculture is the backbone of civilization. In our first issue of the year, we explore indigenous farming techniques returning to the mainstream.',
+    featuredArticles: [
+      'Millet: The Miracle Grain'
+    ],
+    isMostRead: true
+  },
+  {
+    id: 'mag7',
+    issueNumber: 'Vol. 6',
+    title: 'Urban Resurgence',
+    month: 'December',
+    year: '2025',
+    coverImage: 'https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=600&q=80',
+    editorsNote: 'How grassroots organizers are reclaiming concrete jungles and turning abandoned plots into community food forests.',
+    featuredArticles: [
+      'Rooftop Gardens of Mumbai'
     ]
   }
 ];
@@ -320,21 +388,76 @@ export const mockFAQs: FAQItem[] = [
   {
     id: 'faq1',
     question: 'What is The Impact Ledger?',
-    answer: 'The Impact Ledger is a premium editorial publication dedicated to documenting, celebrating, and amplifying stories of change, leadership, and sustainability across NGOs, CSR initiatives, and grassroots movements.'
+    answer: 'The Impact Ledger is a premium magazine dedicated to celebrating impact, innovation, leadership, and social progress. Through compelling stories, insightful features, and thought-provoking content, the magazine highlights individuals, organizations, and initiatives that are creating meaningful change across society.'
   },
   {
     id: 'faq2',
-    question: 'How can our organization submit a story of impact?',
-    answer: 'You can submit stories using our "Submit Your Story" portal. Submissions undergo thorough editorial review for authenticity, measurable impact, and community engagement before publication.'
+    question: 'What is the mission of The Impact Ledger?',
+    answer: 'Our mission is to document, recognize, and amplify stories that inspire positive action. We aim to create a platform where achievements, ideas, and initiatives that contribute to social, economic, and environmental progress receive the visibility they deserve.'
   },
   {
     id: 'faq3',
-    question: 'Is The Impact Ledger a print or digital publication?',
-    answer: 'We operate primarily as a digital publication releasing monthly thematic editions, with special print editions distributed annually to corporate, NGO, and government stakeholders.'
+    question: 'Who is The Impact Ledger designed for?',
+    answer: 'The Impact Ledger is designed for business leaders, CSR professionals, NGOs, policymakers, educators, students, entrepreneurs, investors, changemakers, and readers who are passionate about impact, leadership, and sustainable development.'
   },
   {
     id: 'faq4',
-    question: 'Do you charge organizations for featuring their stories?',
-    answer: 'No. Authentic editorial stories are covered purely on merit, impact, and journalistic value. We generate revenue through partnerships, newsletter sponsorships, and premium advertisements.'
+    question: 'What kind of content does the magazine feature?',
+    answer: 'Each edition features a curated mix of inspiring stories, expert perspectives, leadership insights, social impact features, community success stories, informative articles, engaging reader sections, and selected industry highlights that provide both knowledge and inspiration.'
+  },
+  {
+    id: 'faq5',
+    question: 'What topics does The Impact Ledger cover?',
+    answer: 'The magazine covers a broad range of subjects including CSR, NGOs, education, healthcare, women empowerment, sustainability, environment, youth development, livelihoods, innovation, government initiatives, legal affairs, sports, entertainment, beauty and wellness, leadership, humanitarian efforts, and community development.'
+  },
+  {
+    id: 'faq6',
+    question: 'Is The Impact Ledger only focused on CSR and NGOs?',
+    answer: 'No. While CSR and NGO initiatives are central to our publication, we also explore developments in business, governance, public policy, leadership, innovation, culture, and other sectors that contribute to societal growth and transformation.'
+  },
+  {
+    id: 'faq7',
+    question: 'Can organizations and individuals be featured in the magazine?',
+    answer: 'Yes. We welcome submissions from corporations, NGOs, government institutions, educational organizations, social enterprises, community groups, and individual changemakers whose work demonstrates meaningful impact and excellence.'
+  },
+  {
+    id: 'faq8',
+    question: 'How can I submit a story or initiative for consideration?',
+    answer: 'Stories, projects, achievements, and impact initiatives can be submitted through our editorial team for review. Selected submissions may be featured in upcoming editions based on relevance, credibility, and impact.'
+  },
+  {
+    id: 'faq9',
+    question: 'Is The Impact Ledger available in print?',
+    answer: 'Yes. The Impact Ledger is published as a professionally curated magazine and is available through partner networks, and authorized distribution channels.'
+  },
+  {
+    id: 'faq10',
+    question: 'Does the magazine accept advertisements?',
+    answer: 'Yes. The Impact Ledger collaborates with organizations, brands, institutions, and partners whose values align with innovation, responsibility, sustainability, and positive societal impact.'
+  },
+  {
+    id: 'faq11',
+    question: 'What is Corporate Social Responsibility (CSR)?',
+    answer: 'Corporate Social Responsibility (CSR) is the commitment of businesses and organizations to contribute positively to society through initiatives that support education, healthcare, environmental sustainability, community welfare, and inclusive growth.'
+  },
+  {
+    id: 'faq12',
+    question: 'How does The Impact Ledger ensure content quality?',
+    answer: 'Our editorial team carefully reviews all submissions and featured content to maintain high standards of accuracy, relevance, credibility, and editorial excellence.'
+  },
+  {
+    id: 'faq13',
+    question: 'What makes The Impact Ledger unique?',
+    answer: 'The Impact Ledger combines impactful storytelling, insightful analysis, inspiring achievements, leadership perspectives, and engaging reader experiences into a single publication that informs, inspires, and celebrates progress.'
+  },
+  {
+    id: 'faq14',
+    question: 'What is the vision of The Impact Ledger?',
+    answer: 'Our vision is to become a trusted and influential publication that connects people, organizations, and ideas while inspiring collective action toward a more inclusive, sustainable, and prosperous future.'
+  },
+  {
+    id: 'faq15',
+    question: 'How can I stay connected with The Impact Ledger?',
+    answer: 'Readers can stay connected through special editions, partnerships, and our official communication channels for the latest stories, insights, and opportunities.'
   }
 ];
