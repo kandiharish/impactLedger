@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { BookOpen, Flame } from 'lucide-react';
+import { BookOpen, Flame, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../api';
 
 // --- 3D Magazine Cover Component (For Spotlight) ---
@@ -88,6 +88,89 @@ function MiniIssueCard({ issue }: { issue: any }) {
   );
 }
 
+// --- Archival Vault Carousel ---
+function VaultSlider({ issues }: { issues: any[] }) {
+  const [currentIndex, React_setCurrentIndex] = React.useState(0);
+
+  if (!issues || issues.length === 0) return null;
+
+  const nextSlide = () => {
+    React_setCurrentIndex((prev) => (prev === issues.length - 1 ? 0 : prev + 1));
+  };
+
+  const prevSlide = () => {
+    React_setCurrentIndex((prev) => (prev === 0 ? issues.length - 1 : prev - 1));
+  };
+
+  const currentIssue = issues[currentIndex];
+
+  return (
+    <div className="relative w-full max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center py-6 md:py-12 px-4 md:px-16">
+      
+      {/* Desktop Left Arrow */}
+      <button 
+        onClick={prevSlide}
+        className="hidden md:flex absolute left-0 z-10 p-3 bg-white border border-gray-200 rounded-full shadow-sm hover:shadow-md hover:bg-gray-50 transition-all hover:-translate-x-1 items-center justify-center text-gray-900 hover:text-accent"
+      >
+        <ChevronLeft size={24} />
+      </button>
+
+      <motion.div 
+        key={currentIndex}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex flex-col md:flex-row items-center gap-8 md:gap-16 w-full"
+      >
+        <div className="w-56 sm:w-64 md:w-80 shrink-0 mx-auto">
+          <div className="relative aspect-[3/4] rounded-r-lg rounded-l-sm overflow-hidden shadow-2xl transition-transform hover:scale-105 duration-500">
+             <img src={currentIssue.coverImage} alt={currentIssue.title} className="w-full h-full object-cover filter sepia-[0.3] contrast-125 mix-blend-luminosity" />
+             <div className="absolute top-0 bottom-0 left-0 w-3 bg-gradient-to-r from-black/50 to-transparent mix-blend-multiply"></div>
+          </div>
+        </div>
+        
+        <div className="space-y-4 md:space-y-6 text-center md:text-left flex-1">
+          <p className="text-accent text-xs md:text-sm font-bold uppercase tracking-widest">{currentIssue.issueNumber} • {currentIssue.month} {currentIssue.year}</p>
+          <h3 className="text-3xl md:text-5xl font-heading text-gray-900 leading-tight">{currentIssue.title}</h3>
+          <p className="text-base md:text-lg text-gray-600 font-light leading-relaxed">
+            {currentIssue.editorsNote || "Delve into our historical archives to explore timeless stories of systemic impact and profound change."}
+          </p>
+          <div className="pt-2 md:pt-4">
+            <button className="px-6 py-2.5 md:px-8 md:py-3 border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white rounded-full font-bold uppercase tracking-widest text-xs transition-colors">
+              Read This Volume
+            </button>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Desktop Right Arrow */}
+      <button 
+        onClick={nextSlide}
+        className="hidden md:flex absolute right-0 z-10 p-3 bg-white border border-gray-200 rounded-full shadow-sm hover:shadow-md hover:bg-gray-50 transition-all hover:translate-x-1 items-center justify-center text-gray-900 hover:text-accent"
+      >
+        <ChevronRight size={24} />
+      </button>
+
+      {/* Mobile Arrows */}
+      <div className="flex md:hidden mt-10 gap-6">
+        <button 
+          onClick={prevSlide}
+          className="p-3 w-14 h-14 flex items-center justify-center bg-white border border-gray-200 rounded-full shadow-sm active:bg-gray-50 transition-colors text-gray-900"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <button 
+          onClick={nextSlide}
+          className="p-3 w-14 h-14 flex items-center justify-center bg-white border border-gray-200 rounded-full shadow-sm active:bg-gray-50 transition-colors text-gray-900"
+        >
+          <ChevronRight size={24} />
+        </button>
+      </div>
+
+    </div>
+  );
+}
+
 // --- Main Magazine Newsstand Component ---
 export default function Magazine() {
   const { data: issues = [], isLoading, isError } = useQuery({
@@ -139,15 +222,16 @@ export default function Magazine() {
         <div className="pointer-events-auto flex items-center gap-1 md:gap-2 bg-white/70 backdrop-blur-md border border-gray-200/50 rounded-full px-6 py-2.5 shadow-md">
           <Link to="/" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Home</Link>
           <Link to="/about" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">About Us</Link>
+          <Link to="/team" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Team</Link>
           <Link to="/stories" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Stories</Link>
           <Link to="/magazine" className="px-3 py-1.5 text-xs font-bold text-accent font-sans bg-white/40 shadow-sm rounded-full transition-all duration-300">Magazine</Link>
-          <Link to="/stories" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Editorial</Link>
+          <Link to="/editorial" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Editorial</Link>
           <Link to="/contact" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Contact Us</Link>
           <Link to="/submit-story" className="hidden sm:inline-block bg-accent text-white px-5 py-2 rounded-full text-xs font-bold ml-2 hover:bg-[#B3936B] transition-colors shadow-sm">Submit Story</Link>
         </div>
       </nav>
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-32 pb-24 space-y-32">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-24 pb-16 space-y-16">
         
         {/* --- 1. The Spotlight (Latest Issue) --- */}
         <section className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
@@ -217,34 +301,16 @@ export default function Magazine() {
           </section>
         )}
 
-        {/* --- 3. The Archival Vault --- */}
+        {/* --- 3. Digital Archives (The Vault) --- */}
         <section className="space-y-8 border-t border-gray-200 pt-16">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <h2 className="text-3xl font-heading text-gray-900">The Vault</h2>
+              <h2 className="text-3xl font-heading text-gray-900">Digital Archives</h2>
               <span className="text-gray-400 font-sans text-sm">/ Past Editions</span>
-            </div>
-            {/* Simple Vault Filter */}
-            <div className="flex gap-4">
-              <button className="text-sm font-bold tracking-widest uppercase text-gray-900 border-b-2 border-accent pb-1">All</button>
-              <button className="text-sm font-bold tracking-widest uppercase text-gray-400 hover:text-gray-600 transition-colors">2026</button>
-              <button className="text-sm font-bold tracking-widest uppercase text-gray-400 hover:text-gray-600 transition-colors">2025</button>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 lg:gap-12 pt-8">
-            {archivalIssues.map((issue) => (
-              <motion.div 
-                key={issue.id || issue._id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5 }}
-              >
-                <MiniIssueCard issue={issue} />
-              </motion.div>
-            ))}
-          </div>
+          <VaultSlider issues={archivalIssues} />
         </section>
 
       </div>

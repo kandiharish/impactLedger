@@ -99,9 +99,10 @@ export default function Home() {
         <div className="pointer-events-auto flex items-center gap-1 md:gap-2 bg-white/70 backdrop-blur-md border border-gray-200/50 rounded-full px-6 py-2.5 shadow-md">
           <Link to="/" className="px-3 py-1.5 text-xs font-bold text-accent font-sans bg-white/40 shadow-sm rounded-full transition-all duration-300">Home</Link>
           <Link to="/about" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">About Us</Link>
+          <Link to="/team" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Team</Link>
           <Link to="/stories" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Stories</Link>
           <Link to="/magazine" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Magazine</Link>
-          <Link to="/stories" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Editorial</Link>
+          <Link to="/editorial" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Editorial</Link>
           <Link to="/contact" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Contact Us</Link>
           <Link to="/submit-story" className="hidden sm:inline-block bg-accent text-white px-5 py-2 rounded-full text-xs font-bold ml-2 hover:bg-[#B3936B] transition-colors shadow-sm">Submit Story</Link>
         </div>
@@ -146,7 +147,7 @@ export default function Home() {
       </section>
 
       {/* --- SECTION 1: ABOUT US (Ideology cards/points instead of wall of text) --- */}
-      <section className="relative py-24 md:py-32 z-10 bg-white border-t border-gray-100">
+      <section className="relative py-16 md:py-20 z-10 bg-white border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
             
@@ -195,7 +196,7 @@ export default function Home() {
       </section>
 
       {/* --- SECTION 2: focus areas (The application focus) --- */}
-      <section className="relative py-24 bg-[#FAF9F6] z-10 border-y border-gray-100">
+      <section className="relative py-16 md:py-20 bg-[#FAF9F6] z-10 border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16">
           <div className="text-center space-y-4 max-w-xl mx-auto">
             <span className="text-xs uppercase tracking-widest text-accent font-semibold">Core Focus Areas</span>
@@ -232,7 +233,7 @@ export default function Home() {
       </section>
 
       {/* --- SECTION 3: MAGAZINE EDITIONS GRID (Replaces confusing 3D overlap) --- */}
-      <section className="relative py-24 md:py-32 z-10 bg-white max-w-7xl mx-auto px-6 md:px-12 space-y-12">
+      <section className="relative py-16 md:py-20 z-10 bg-white max-w-7xl mx-auto px-6 md:px-12 space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-4">
             <span className="text-xs uppercase tracking-widest text-accent font-semibold">The Newsstand</span>
@@ -268,7 +269,7 @@ export default function Home() {
       </section>
 
       {/* --- SECTION 4: FAQ SECTION (Organized by Type, reveals accordingly) --- */}
-      <section className="relative py-24 md:py-32 z-10 border-t border-gray-100 bg-[#FAF9F6]">
+      <section className="relative py-16 md:py-20 z-10 border-t border-gray-100 bg-[#FAF9F6]">
         <div className="max-w-4xl mx-auto px-6 md:px-12 space-y-16">
           <div className="text-center space-y-4">
             <span className="text-xs uppercase tracking-widest text-accent font-semibold">Support Desk</span>
