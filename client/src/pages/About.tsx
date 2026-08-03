@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Quote, Users, Globe2, BookOpen } from 'lucide-react';
+import TeamBook from '../components/ui/TeamBook';
 
 export default function About() {
   return (
@@ -72,9 +73,6 @@ export default function About() {
               </p>
             </div>
             
-            <div className="pt-8 border-t border-gray-150">
-              <p className="text-sm font-bold tracking-widest uppercase text-gray-800">— The Editorial Board</p>
-            </div>
           </div>
         </motion.section>
 
@@ -116,33 +114,14 @@ export default function About() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="space-y-12 pt-16 border-t border-gray-150"
+          className="space-y-12 pt-16 border-t border-gray-150 overflow-hidden"
         >
           <div className="text-center space-y-4">
-            <h2 className="text-4xl font-serif font-bold text-gray-900">The Editorial Board</h2>
-            <p className="text-gray-600 font-light max-w-2xl mx-auto">The visionaries and journalists curating the world's most profound stories of impact.</p>
+            <h2 className="text-4xl font-serif font-bold text-gray-900">Our Team</h2>
+            <p className="text-gray-600 font-light max-w-2xl mx-auto">The visionaries and journalists behind the Impact Ledger.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-12">
-            {[
-              { name: "Sarah Jenkins", role: "Editor-in-Chief", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=300&h=300", bio: "Former investigative lead at global news outlets, now dedicated to solution journalism." },
-              { name: "David Chen", role: "Head of Archives", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=300&h=300", bio: "Curator of The Vault, bringing order to decades of environmental and social impact data." },
-              { name: "Amara Okoro", role: "Field Director", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300&h=300", bio: "Oversees ground operations and authentic sourcing in emerging markets." },
-            ].map((member, i) => (
-              <div key={i} className="space-y-4 text-center group cursor-pointer">
-                <div className="w-40 h-40 mx-auto rounded-full overflow-hidden border-4 border-gray-50 shadow-sm transition-transform duration-500 group-hover:scale-105 group-hover:border-accent/20">
-                  <img src={member.image} alt={member.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-serif font-bold text-gray-900">{member.name}</h3>
-                  <p className="text-accent text-xs font-bold tracking-widest uppercase mt-1">{member.role}</p>
-                </div>
-                <p className="text-sm text-gray-600 font-light leading-relaxed max-w-xs mx-auto">
-                  {member.bio}
-                </p>
-              </div>
-            ))}
-          </div>
+          <TeamBook />
         </motion.section>
 
       </div>
