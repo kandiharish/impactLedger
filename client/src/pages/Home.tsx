@@ -268,8 +268,49 @@ export default function Home() {
         </div>
       </section>
 
+      {/* --- SECTION 3.5: THE TEAM --- */}
+      <section className="relative py-16 md:py-20 z-10 bg-[#FAF9F6] border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-4">
+              <span className="text-xs uppercase tracking-widest text-accent font-semibold">Behind The Ledger</span>
+              <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900">Our Team</h2>
+            </div>
+            <Link to="/team" className="text-accent font-bold hover:underline tracking-widest text-xs uppercase flex items-center gap-2">
+              Meet The Full Board &rarr;
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {[
+              { name: "Eleanor Wright", role: "Editor-in-Chief", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=600" },
+              { name: "David Chen", role: "Investigative Lead", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=600" },
+              { name: "Sarah Al-Fayed", role: "Sustainability Director", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=600" }
+            ].map((member, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: idx * 0.1 }}
+                className="group relative overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm"
+              >
+                <div className="aspect-[4/5] overflow-hidden">
+                  <img src={member.img} alt={member.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
+                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                  <h3 className="text-2xl font-serif font-bold mb-1">{member.name}</h3>
+                  <p className="text-xs uppercase tracking-widest text-accent font-semibold">{member.role}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* --- SECTION 4: FAQ SECTION (Organized by Type, reveals accordingly) --- */}
-      <section className="relative py-16 md:py-20 z-10 border-t border-gray-100 bg-[#FAF9F6]">
+      <section className="relative py-16 md:py-20 z-10 border-t border-gray-100 bg-white">
         <div className="max-w-4xl mx-auto px-6 md:px-12 space-y-16">
           <div className="text-center space-y-4">
             <span className="text-xs uppercase tracking-widest text-accent font-semibold">Support Desk</span>
