@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Quote, Users, Globe2, BookOpen } from 'lucide-react';
+import { Users, Globe2, BookOpen } from 'lucide-react';
 import TeamBook from '../components/ui/TeamBook';
 
 export default function About() {
