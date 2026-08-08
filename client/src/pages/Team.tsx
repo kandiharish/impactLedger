@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import TeamBook from '../components/ui/TeamBook';
-import { Users, Mail, Globe, Shield } from 'lucide-react';
+import { Users, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Team() {

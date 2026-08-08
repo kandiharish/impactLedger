@@ -7,7 +7,6 @@ import Magazine from './pages/Magazine';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import SubmitStory from './pages/SubmitStory';
-import Editorial from './pages/Editorial';
 import Team from './pages/Team';
 import PageTransition from './components/layout/PageTransition';
 
@@ -94,7 +93,7 @@ export default function App() {
             <Route path="/magazine" element={<PageTransition><Magazine /></PageTransition>} />
             <Route path="/about" element={<PageTransition><About /></PageTransition>} />
             <Route path="/team" element={<PageTransition><Team /></PageTransition>} />
-            <Route path="/editorial" element={<PageTransition><Editorial /></PageTransition>} />
+            <Route path="/editorial" element={<PageTransition><PlaceholderPage title="Editorial" /></PageTransition>} />
             <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
             <Route path="/submit-story" element={<PageTransition><SubmitStory /></PageTransition>} />
             <Route path="/privacy" element={<PageTransition><PlaceholderPage title="Privacy Policy" /></PageTransition>} />

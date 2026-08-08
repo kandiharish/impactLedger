@@ -49,32 +49,7 @@ export default function About() {
           </p>
         </motion.section>
 
-        <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
-          className="bg-white border border-gray-200 rounded-3xl p-10 md:p-16 relative overflow-hidden shadow-sm"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
-          
-          <div className="relative z-10 space-y-12">
-            <Quote className="w-16 h-16 text-accent/30" />
-            
-            <div className="space-y-6 text-lg md:text-xl font-light text-gray-700 leading-relaxed font-serif">
-              <p>
-                For too long, the narrative of social change has been relegated to annual reports and compliance spreadsheets. We believe that true impact is narrative, human, and fundamentally transformative.
-              </p>
-              <p>
-                Founded by a coalition of investigative journalists and social sector veterans, The Impact Ledger was born from a simple observation: the most profound innovations in healthcare, education, and ecological restoration were happening in the darkest corners of the globe, yet they lacked a premium platform to share their blueprints.
-              </p>
-              <p>
-                We do not just publish articles. We curate a registry of courage, resilience, and systemic triumph.
-              </p>
-            </div>
-            
-          </div>
-        </motion.section>
+
 
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
