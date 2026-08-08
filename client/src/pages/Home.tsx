@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, ChevronDown, Heart, Shield, Award, Landmark } from 'lucide-react';
 import { api } from '../api';
 import { mockMagazineIssues } from '../data/mockData';
-import TeamBook from '../components/ui/TeamBook';
+import TeamShowcase from '../components/ui/TeamShowcase';
 
 // --- BlurText Component ---
 const BlurText = ({ text, className = "", delayOffset = 0 }: { text: string, className?: string, delayOffset?: number }) => {
@@ -282,7 +282,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <TeamBook />
+          <TeamShowcase />
         </div>
       </section>
 
