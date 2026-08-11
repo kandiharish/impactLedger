@@ -100,7 +100,7 @@ export default function Home() {
         <div className="pointer-events-auto flex items-center gap-1 md:gap-2 bg-white/70 backdrop-blur-md border border-gray-200/50 rounded-full px-6 py-2.5 shadow-md">
           <Link to="/" className="px-3 py-1.5 text-xs font-bold text-accent font-sans bg-white/40 shadow-sm rounded-full transition-all duration-300">Home</Link>
           <Link to="/about" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">About Us</Link>
-          <Link to="/team" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Team</Link>
+
           <Link to="/stories" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Stories</Link>
           <Link to="/magazine" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Magazine</Link>
           <Link to="/editorial" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Editorial</Link>
@@ -277,9 +277,6 @@ export default function Home() {
               <span className="text-xs uppercase tracking-widest text-accent font-semibold">Behind The Ledger</span>
               <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900">Our Team</h2>
             </div>
-            <Link to="/team" className="text-accent font-bold hover:underline tracking-widest text-xs uppercase flex items-center gap-2">
-              Meet The Full Board &rarr;
-            </Link>
           </div>
 
           <TeamShowcase />
