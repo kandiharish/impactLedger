@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Outfit', system-ui, sans-serif;
   --font-serif: 'Playfair Display', Georgia, serif;
   --font-heading: 'Instrument Serif', serif;
   --font-display: 'Anton', sans-serif;
@@ -26,8 +26,17 @@
 
 /* Custom Base Styles */
 body {
-  background-color: var(--color-background-warm);
+  background: linear-gradient(-45deg, #FAF9F6, #FFF5E1, #FDFBF7, #F0E6D2);
+  background-size: 400% 400%;
+  animation: shinyGradient 15s ease infinite;
   color: var(--color-text-primary);
+  min-height: 100vh;
+}
+
+@keyframes shinyGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 h1, h2, h3, h4, h5, h6 {

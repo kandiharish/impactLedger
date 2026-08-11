@@ -34,9 +34,9 @@ export default function Stories() {
   const isLoading = loadingCategories || loadingStories;
 
   return (
-    <div className="flex flex-col min-h-screen relative overflow-hidden bg-white text-gray-900">
+    <div className="flex flex-col min-h-screen relative overflow-hidden bg-transparent text-gray-900">
       {/* Fixed Background Image */}
-      <div className="fixed inset-0 z-0 bg-white">
+      <div className="fixed inset-0 z-0 bg-transparent">
         <img 
           src="/stories%20bg.png" 
           alt="Stories Background" 

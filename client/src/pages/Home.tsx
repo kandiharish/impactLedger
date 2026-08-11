@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, ChevronDown, Heart, Shield, Award, Landmark } from 'lucide-react';
 import { api } from '../api';
 import { mockMagazineIssues } from '../data/mockData';
-import TeamShowcase from '../components/ui/TeamShowcase';
+import TeamBook from '../components/ui/TeamBook';
 
 // --- BlurText Component ---
 const BlurText = ({ text, className = "", delayOffset = 0 }: { text: string, className?: string, delayOffset?: number }) => {
@@ -89,7 +89,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen relative overflow-hidden bg-white text-gray-900">
+    <div className="flex flex-col min-h-screen relative overflow-hidden text-gray-900 bg-transparent">
       
       {/* Fixed Navbar (Floating Glass Pill - Logo on left without BG, Links inside glassy pill on right) */}
       <nav className="fixed top-6 inset-x-4 md:inset-x-12 z-50 flex items-center justify-between pointer-events-none">
@@ -136,7 +136,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
             className="mt-8 text-lg md:text-xl text-gray-700 max-w-2xl font-sans font-light leading-relaxed"
           >
-            Discover the universe of positive transformation. Our pioneering journalism and breakthrough editorials bring grassroots initiatives within reach—secure, verified, and extraordinary.
+            Discover the universe of positive transformation. Our pioneering journalism and breakthrough editorials bring grassroots initiatives within reach-secure, verified, and extraordinary.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }} className="mt-10 flex flex-wrap items-center gap-6">
@@ -148,7 +148,7 @@ export default function Home() {
       </section>
 
       {/* --- SECTION 1: ABOUT US (Ideology cards/points instead of wall of text) --- */}
-      <section className="relative py-16 md:py-20 z-10 bg-white border-t border-gray-100">
+      <section className="relative py-16 md:py-20 z-10 bg-transparent border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
             
@@ -167,7 +167,7 @@ export default function Home() {
                 Every Impact Deserves to Be Remembered
               </h2>
               <p className="text-gray-600 font-sans font-light leading-relaxed">
-                The Impact Ledger was founded on a simple yet powerful belief—that every act of impact deserves to be seen, celebrated, and remembered. We serve as a record of purpose, perseverance, and progress.
+                The Impact Ledger was founded on a simple yet powerful belief-that every act of impact deserves to be seen, celebrated, and remembered. We serve as a record of purpose, perseverance, and progress.
               </p>
             </motion.div>
 
@@ -197,7 +197,7 @@ export default function Home() {
       </section>
 
       {/* --- SECTION 2: focus areas (The application focus) --- */}
-      <section className="relative py-16 md:py-20 bg-[#FAF9F6] z-10 border-y border-gray-100">
+      <section className="relative py-16 md:py-20 bg-transparent z-10 border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16">
           <div className="text-center space-y-4 max-w-xl mx-auto">
             <span className="text-xs uppercase tracking-widest text-accent font-semibold">Core Focus Areas</span>
@@ -234,7 +234,7 @@ export default function Home() {
       </section>
 
       {/* --- SECTION 3: MAGAZINE EDITIONS GRID (Replaces confusing 3D overlap) --- */}
-      <section className="relative py-16 md:py-20 z-10 bg-white max-w-7xl mx-auto px-6 md:px-12 space-y-12">
+      <section className="relative py-16 md:py-20 z-10 bg-transparent max-w-7xl mx-auto px-6 md:px-12 space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-4">
             <span className="text-xs uppercase tracking-widest text-accent font-semibold">The Newsstand</span>
@@ -270,7 +270,7 @@ export default function Home() {
       </section>
 
       {/* --- SECTION 3.5: THE TEAM --- */}
-      <section className="relative py-16 md:py-20 z-10 bg-[#FAF9F6] border-t border-gray-100 overflow-hidden">
+      <section className="relative py-16 md:py-20 z-10 bg-transparent border-t border-gray-100 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-4">
@@ -279,12 +279,12 @@ export default function Home() {
             </div>
           </div>
 
-          <TeamShowcase />
+          <TeamBook />
         </div>
       </section>
 
       {/* --- SECTION 4: FAQ SECTION (Organized by Type, reveals accordingly) --- */}
-      <section className="relative py-16 md:py-20 z-10 border-t border-gray-100 bg-white">
+      <section className="relative py-16 md:py-20 z-10 border-t border-gray-100 bg-transparent">
         <div className="max-w-4xl mx-auto px-6 md:px-12 space-y-16">
           <div className="text-center space-y-4">
             <span className="text-xs uppercase tracking-widest text-accent font-semibold">Support Desk</span>

@@ -201,10 +201,10 @@ export default function Magazine() {
   const archivalIssues = issues.slice(1); // Everything except the latest
 
   return (
-    <div className="flex flex-col min-h-screen relative bg-white text-gray-900">
+    <div className="flex flex-col min-h-screen relative bg-transparent text-gray-900">
       
       {/* Fixed Background Image */}
-      <div className="fixed inset-0 z-0 bg-white">
+      <div className="fixed inset-0 z-0 bg-transparent">
         <img 
           src="/magazine%20bg.png" 
           alt="Newsstand Background" 

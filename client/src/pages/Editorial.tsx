@@ -4,7 +4,7 @@ import { ShieldCheck, BarChart3, Scale, ArrowRight, Quote } from 'lucide-react';
 
 export default function Editorial() {
   return (
-    <div className="flex flex-col min-h-screen relative bg-white text-gray-900">
+    <div className="flex flex-col min-h-screen relative bg-transparent text-gray-900">
       
       {/* Background Noise overlay */}
       <div className="absolute inset-0 bg-noise opacity-10 mix-blend-overlay pointer-events-none z-0"></div>

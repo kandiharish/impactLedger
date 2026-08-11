@@ -16,7 +16,7 @@ const queryClient = new QueryClient();
 function Layout({ children }: { children: React.ReactNode }) {
 
   return (
-    <div className="min-h-screen flex flex-col bg-background-warm text-text-primary">
+    <div className="min-h-screen flex flex-col text-text-primary bg-transparent">
 
       <main className="flex-1 w-full">
         {children}

@@ -165,7 +165,7 @@ export const mockStories: Story[] = [
     summary: 'How community-led seed banks and traditional oak planting are bringing drying water springs back to life across rural Uttarakhand.',
     content: `For decades, the standard narrative from the lower Himalayan ridge of Uttarakhand was one of ecological distress. Rapid deforestation combined with the monoculture of fire-prone pine forests had depleted local water tables, drying up ancient mountain springs (known locally as Naulas). 
     
-    But in early 2021, the Himalayan Seed Trust initiated a community forestry movement. Instead of relying on top-down government plantations, they empowered local village councils—particularly women-led Mahila Mangal Dals—to establish local seed collection networks. By collecting and nurturing seeds of native broadleaved trees like the Banj Oak (Quercus leucotrichophora), they introduced a resilient ecosystem that holds rainwater and recharges groundwater tables.
+    But in early 2021, the Himalayan Seed Trust initiated a community forestry movement. Instead of relying on top-down government plantations, they empowered local village councils-particularly women-led Mahila Mangal Dals-to establish local seed collection networks. By collecting and nurturing seeds of native broadleaved trees like the Banj Oak (Quercus leucotrichophora), they introduced a resilient ecosystem that holds rainwater and recharges groundwater tables.
     
     Today, over 450 hectares have been reforested. More importantly, seven historically dry mountain springs are flowing again, securing drinking water for over 3,000 mountain households. The restoration has not only saved local biodiversity but has also created a sustainable model of community land stewardship.`,
     category: 'Environment',
@@ -370,7 +370,7 @@ export const mockInterviews: Interview[] = [
 export const mockTestimonials: Testimonial[] = [
   {
     id: 't1',
-    quote: 'The Impact Ledger does not just write articles—they provide deep, investigative narratives that give our grassroots efforts national visibility and credibility.',
+    quote: 'The Impact Ledger does not just write articles-they provide deep, investigative narratives that give our grassroots efforts national visibility and credibility.',
     author: 'Sunita Devi',
     role: 'Director',
     organization: 'Himalayan Seed Trust'
