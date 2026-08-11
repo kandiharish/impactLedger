@@ -6,6 +6,7 @@ import { ArrowUpRight, ChevronDown, Heart, Shield, Award, Landmark } from 'lucid
 import { api } from '../api';
 import { mockMagazineIssues } from '../data/mockData';
 import TeamBook from '../components/ui/TeamBook';
+import ImpactMap from '../components/ui/ImpactMap';
 
 // --- BlurText Component ---
 const BlurText = ({ text, className = "", delayOffset = 0 }: { text: string, className?: string, delayOffset?: number }) => {
@@ -232,6 +233,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* --- NEW SECTION: IMPACT MAP --- */}
+      <ImpactMap />
 
       {/* --- SECTION 3: MAGAZINE EDITIONS GRID (Replaces confusing 3D overlap) --- */}
       <section className="relative py-16 md:py-20 z-10 bg-transparent max-w-7xl mx-auto px-6 md:px-12 space-y-12">

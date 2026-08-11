@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 
 const TEAM_MEMBERS = [
@@ -49,11 +49,19 @@ const Page = React.forwardRef<HTMLDivElement, { children: React.ReactNode; numbe
 
 export default function TeamBook() {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [isClosed, setIsClosed] = useState(true);
   
-  const playSound = () => {
+  const handleFlip = (e: any) => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(e => console.log('Audio play failed', e));
+      audioRef.current.play().catch(err => console.log('Audio play failed', err));
+    }
+    
+    // Check if the book is back on the cover (page 0)
+    if (e.data === 0) {
+      setIsClosed(true);
+    } else {
+      setIsClosed(false);
     }
   };
 
@@ -61,7 +69,7 @@ export default function TeamBook() {
     <div className="flex flex-col items-center justify-center py-6 md:py-10 w-full relative z-10">
       <audio ref={audioRef} src="https://actions.google.com/sounds/v1/office/paper_flip.ogg" preload="auto" />
       
-      <div className="relative w-full max-w-5xl flex justify-center shadow-lg rounded-sm border border-[#e3ded2] bg-[#f6f5f0]">
+      <div className="relative w-full max-w-5xl flex justify-center">
         
         {/* @ts-ignore - HTMLFlipBook types are often incompatible with React 18+ strict mode */}
         <HTMLFlipBook 
@@ -73,11 +81,25 @@ export default function TeamBook() {
           minHeight={400} 
           maxHeight={1533} 
           maxShadowOpacity={0.3} 
-          showCover={false} 
+          showCover={true} 
           mobileScrollSupport={true} 
-          onFlip={playSound}
-          className="flip-book z-40 bg-transparent"
+          onFlip={handleFlip}
+          className={`flip-book z-40 bg-transparent transition-transform duration-700 ease-in-out ${isClosed ? 'md:-translate-x-1/4' : 'translate-x-0'}`}
         >
+          {/* Front Cover */}
+          <Page number={0} className="bg-[#1a2430] shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+             <div className="w-full h-full flex flex-col justify-center items-center relative p-8">
+                <div className="w-full h-full border-[1px] border-[#C4A47C]/40 flex flex-col justify-center items-center p-8 text-center relative">
+                  <div className="absolute top-8 left-8 right-8 bottom-8 border-[1px] border-[#C4A47C]/20 pointer-events-none"></div>
+                  <span className="text-xs uppercase tracking-[0.4em] text-[#C4A47C] font-bold mb-8">The Impact Ledger</span>
+                  <h2 className="text-4xl md:text-6xl font-serif font-bold text-[#FDF9F1] leading-tight">
+                    Our<br/>Team
+                  </h2>
+                  <div className="w-12 h-[2px] mt-10 bg-[#C4A47C]"></div>
+                </div>
+             </div>
+          </Page>
+
           {TEAM_MEMBERS.flatMap((member, i) => {
             const theme = THEMES[member.theme as keyof typeof THEMES];
             return [
@@ -129,6 +151,13 @@ export default function TeamBook() {
               </Page>
             ];
           })}
+
+          {/* Back Cover */}
+          <Page number={TEAM_MEMBERS.length * 2 + 1} className="bg-[#1a2430] shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
+             <div className="w-full h-full flex flex-col justify-center items-center relative border-l border-gray-800">
+                <span className="text-xs uppercase tracking-[0.3em] text-gray-600 font-bold">The End</span>
+             </div>
+          </Page>
         </HTMLFlipBook>
       </div>
 
