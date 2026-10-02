@@ -257,7 +257,7 @@ export default function Home() {
           </Reveal>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-x-10">
+        <div className={`grid gap-x-6 gap-y-12 md:gap-x-10 ${magazineIssues.length <= 2 ? 'grid-cols-2 max-w-3xl' : 'grid-cols-2 lg:grid-cols-4'}`}>
           {magazineIssues.slice(0, 4).map((issue, idx) => (
             <Reveal key={issue.id || issue._id} delay={idx * 0.08}>
               <Link to={issue.pageCount ? `/magazine/${issue.id || issue._id}/read` : "/magazine"} className="group flex flex-col gap-5 [perspective:1200px]">

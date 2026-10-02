@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ArrowUpRight, X } from 'lucide-react';
 import { api } from '../api';
 import { SplitHeading } from '../components/ui/Reveal';
+import ComingSoon from '../components/ui/ComingSoon';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -48,6 +49,13 @@ export default function Stories() {
   };
 
   const isLoading = loadingCategories || loadingStories;
+
+  // Unfiltered list, shared with the home page; tells us whether anything is published at all
+  const { data: allStories, isLoading: loadingAll } = useQuery({
+    queryKey: ['stories', 'all', ''],
+    queryFn: () => api.getStories('all', ''),
+  });
+  const noStoriesYet = !loadingAll && (allStories?.length ?? 0) === 0;
 
   const filters = [{ slug: 'all', name: 'All Stories', key: 'all' }, ...categories.map((c) => ({ slug: c.slug, name: c.name, key: c._id || c.id || c.slug }))];
 
@@ -93,6 +101,15 @@ export default function Stories() {
           </motion.p>
         </div>
 
+        {noStoriesYet ? (
+          <ComingSoon
+            eyebrow="Arriving on the Ledger"
+            title="Every story deserves its own page."
+            message="We're bringing each feature from our editions to the web, one story at a time. Until then, every story is waiting for you in the full edition, cover to cover."
+            secondary={{ to: '/submit-story', label: 'Share Your Story' }}
+          />
+        ) : (
+          <>
         {/* Category Filters + Search */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -221,6 +238,8 @@ export default function Stories() {
             <h3 className="font-heading italic text-4xl text-ink">No Stories Found</h3>
             <p className="text-sm text-stone-500">Try adjusting your category or search term.</p>
           </motion.div>
+        )}
+          </>
         )}
       </div>
     </div>

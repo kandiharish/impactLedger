@@ -5,6 +5,7 @@ import HTMLFlipBook from 'react-pageflip';
 import { ArrowLeft, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { api } from '../api';
 import { NAVBAR_HEIGHT } from '../components/layout/Navbar';
+import PrintNotice from '../components/ui/PrintNotice';
 
 /** How many pages either side of the current one get their image loaded. */
 const PRELOAD_RADIUS = 4;
@@ -151,6 +152,9 @@ export default function MagazineReader() {
         </button>
       </div>
       <p className="hidden md:block pb-8 text-center text-[10px] uppercase tracking-[0.25em] text-stone-500">Use the arrow keys or drag a page corner to turn</p>
+      <div className="px-5 pb-10">
+        <PrintNotice tone="dark" className="max-w-3xl mx-auto" />
+      </div>
     </div>
   );
 }

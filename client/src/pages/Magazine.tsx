@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { BookOpen, Flame, ChevronLeft, ChevronRight, ArrowUpRight, Download } from 'lucide-react';
 import { api } from '../api';
+import PrintNotice from '../components/ui/PrintNotice';
 import { Reveal, SectionHeading } from '../components/ui/Reveal';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -119,6 +120,7 @@ function VaultSlider({ issues }: { issues: any[] }) {
   const goTo = (i: number) => setSlide(([prev]) => [i, i > prev ? 1 : -1]);
 
   const currentIssue = issues[currentIndex];
+  const multiple = issues.length > 1;
 
   const arrowClass = "w-14 h-14 flex items-center justify-center rounded-full bg-white border border-line shadow-[var(--shadow-soft)] text-ink hover:bg-ink hover:text-white hover:border-ink transition-all duration-300";
 
@@ -134,9 +136,9 @@ function VaultSlider({ issues }: { issues: any[] }) {
       <div className="absolute -top-24 -left-24 w-80 h-80 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
 
       {/* Desktop Left Arrow */}
-      <button onClick={prevSlide} aria-label="Previous issue" className={`hidden md:flex absolute left-5 top-1/2 -translate-y-1/2 z-10 ${arrowClass}`}>
+      {multiple && <button onClick={prevSlide} aria-label="Previous issue" className={`hidden md:flex absolute left-5 top-1/2 -translate-y-1/2 z-10 ${arrowClass}`}>
         <ChevronLeft size={22} />
-      </button>
+      </button>}
 
       <div className="relative min-h-[520px] md:min-h-[420px] flex items-center">
         <AnimatePresence mode="wait" custom={direction}>
@@ -177,12 +179,12 @@ function VaultSlider({ issues }: { issues: any[] }) {
       </div>
 
       {/* Desktop Right Arrow */}
-      <button onClick={nextSlide} aria-label="Next issue" className={`hidden md:flex absolute right-5 top-1/2 -translate-y-1/2 z-10 ${arrowClass}`}>
+      {multiple && <button onClick={nextSlide} aria-label="Next issue" className={`hidden md:flex absolute right-5 top-1/2 -translate-y-1/2 z-10 ${arrowClass}`}>
         <ChevronRight size={22} />
-      </button>
+      </button>}
 
       {/* Progress dots + mobile arrows */}
-      <div className="relative mt-10 flex items-center justify-center gap-6">
+      {multiple && <div className="relative mt-10 flex items-center justify-center gap-6">
         <button onClick={prevSlide} aria-label="Previous issue" className={`md:hidden ${arrowClass} !w-11 !h-11`}>
           <ChevronLeft size={18} />
         </button>
@@ -202,7 +204,7 @@ function VaultSlider({ issues }: { issues: any[] }) {
         <button onClick={nextSlide} aria-label="Next issue" className={`md:hidden ${arrowClass} !w-11 !h-11`}>
           <ChevronRight size={18} />
         </button>
-      </div>
+      </div>}
 
     </div>
   );
@@ -310,6 +312,7 @@ export default function Magazine() {
                   </a>
                 )}
               </div>
+              <PrintNotice className="mt-6 max-w-xl" />
             </motion.div>
 
             <motion.div

@@ -1,38 +1,10 @@
-import { useEffect, useState, useRef } from 'react';
-import { motion, useMotionValue, useTransform, animate, useInView, useScroll } from 'framer-motion';
+import { useRef } from 'react';
+import { motion, useTransform, useScroll } from 'framer-motion';
 import { ArrowRight, ArrowUpRight, BookOpen, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Reveal, SplitHeading } from './Reveal';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-
-function CountingNumber({ value, duration = 2 }: { value: number, duration?: number }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const count = useMotionValue(0);
-  const rounded = useTransform(count, Math.round);
-  const [displayValue, setDisplayValue] = useState(0);
-
-  useEffect(() => {
-    const unsubscribe = rounded.on("change", (v) => setDisplayValue(v));
-    return unsubscribe;
-  }, [rounded]);
-
-  useEffect(() => {
-    if (isInView) {
-      animate(count, value, { duration, ease: "easeOut" });
-    }
-  }, [count, isInView, value, duration]);
-
-  return <span ref={ref} className="tabular-nums">{displayValue < 10 ? `0${displayValue}` : displayValue}</span>;
-}
-
-const STATS = [
-  { value: 48, label: 'Stories' },
-  { value: 24, label: 'Organizations' },
-  { value: 16, label: 'Communities' },
-  { value: 8, label: 'Districts' },
-];
 
 export default function ImpactMap() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -87,60 +59,40 @@ export default function ImpactMap() {
            {/* Space reserved for map visibility */}
         </div>
 
-        {/* RIGHT COLUMN: Interactive Stats Panel */}
-        <div className="lg:col-span-4 space-y-4">
+        {/* RIGHT COLUMN: what the map will hold */}
+        <div className="lg:col-span-4">
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.98 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.9, ease: EASE }}
-            className="relative rounded-[24px] p-7 space-y-6 overflow-hidden bg-white/55 backdrop-blur-xl border border-white/80 shadow-[0_30px_60px_-30px_rgba(90,60,20,0.45),inset_0_1px_0_rgba(255,255,255,0.9)]"
+            className="relative rounded-[24px] p-8 space-y-6 overflow-hidden bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_30px_60px_-30px_rgba(90,60,20,0.45),inset_0_1px_0_rgba(255,255,255,0.9)]"
           >
-            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-accent/20 blur-3xl pointer-events-none" />
-
-            {/* Top State Info */}
-            <div className="relative flex justify-between items-start border-b border-accent/20 pb-5">
-              <div>
-                <h3 className="text-[#3B2F22] font-serif text-2xl font-semibold tracking-[0.06em]">TELANGANA</h3>
-                <p className="text-[#8B7355] text-xs mt-1 font-medium">South India</p>
-              </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-accent-deep font-semibold">The Impact Map</span>
               <span className="relative flex items-center justify-center w-11 h-11 rounded-full bg-white border border-accent/30 shadow-sm">
                 <span className="absolute inset-0 rounded-full bg-accent/30 animate-ping-slow" />
                 <MapPin className="relative text-accent-deep w-5 h-5" />
               </span>
             </div>
-
-            {/* Stats Grid */}
-            <div className="relative grid grid-cols-2 gap-3">
-              {STATS.map((s) => (
-                <div key={s.label} className="rounded-2xl bg-white/60 border border-white px-4 py-4 transition-all duration-500 hover:bg-white hover:-translate-y-0.5 hover:shadow-md">
-                  <div className="text-3xl font-heading text-[#3B2F22] leading-none mb-2"><CountingNumber value={s.value} duration={2.5} /></div>
-                  <div className="text-[#8B7355] text-[10px] font-semibold uppercase tracking-[0.18em]">{s.label}</div>
-                </div>
-              ))}
+            <h3 className="font-heading italic text-3xl text-[#3B2F22] leading-tight">
+              Charting change, state by state.
+            </h3>
+            <div className="flex items-center gap-2">
+              <span className="w-10 h-px bg-accent" />
+              <span className="w-1.5 h-1.5 rotate-45 bg-accent" />
             </div>
-
-            {/* Featured Story Snippet */}
-            <Link to="/stories" className="relative group flex gap-4 items-center rounded-2xl p-3 -mx-1 hover:bg-white/70 transition-colors">
-              <div className="w-20 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
-                <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=200" alt="Students" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-              </div>
-              <div className="flex-1 space-y-1.5">
-                <div className="text-[9px] text-[#8B7355] font-semibold uppercase tracking-[0.22em]">Featured Story</div>
-                <h4 className="text-[#3B2F22] font-serif text-sm leading-snug">Empowering Rural Youth through Education</h4>
-                <span className="text-accent-deep text-[10px] font-semibold uppercase tracking-[0.18em] flex items-center gap-1">
-                  Read Story <ArrowUpRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </span>
-              </div>
+            <p className="text-[15px] text-[#5C4A36] font-light leading-relaxed">
+              With every edition, we add the initiatives, organisations and communities we feature to our map of impact across India.
+              The state-by-state ledger opens soon.
+            </p>
+            <Link to="/magazine" className="group flex items-center justify-between gap-4 rounded-2xl bg-white/70 border border-white px-5 py-4 hover:bg-white hover:shadow-md transition-all duration-500">
+              <span className="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] font-semibold text-[#3B2F22]">
+                <BookOpen className="w-4 h-4 text-accent" /> Explore Our Editions
+              </span>
+              <ArrowUpRight className="w-4 h-4 text-accent-deep transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
           </motion.div>
-
-          <Reveal delay={0.1}>
-            <button className="group w-full py-4 rounded-2xl flex justify-center items-center gap-3 bg-white/40 backdrop-blur border border-accent/30 hover:border-accent hover:bg-white/80 transition-all duration-500 text-[#3B2F22] text-[10px] uppercase tracking-[0.25em] font-semibold">
-              <BookOpen className="w-3.5 h-3.5 text-accent transition-transform group-hover:-rotate-6" />
-              View All States
-            </button>
-          </Reveal>
         </div>
 
       </div>

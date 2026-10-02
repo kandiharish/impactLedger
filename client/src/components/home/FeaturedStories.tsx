@@ -4,6 +4,7 @@ import { ArrowUpRight, ArrowRight } from 'lucide-react';
 import { api } from '../../api';
 import ImageReveal from '../ui/ImageReveal';
 import { Reveal, SectionHeading } from '../ui/Reveal';
+import ComingSoon from '../ui/ComingSoon';
 
 /** Lead story beside a column of editor's picks — the "front page" of the home screen. */
 export default function FeaturedStories() {
@@ -12,7 +13,21 @@ export default function FeaturedStories() {
   const featured = stories.find((s) => s.isFeatured) ?? stories[0];
   const picks = stories.filter((s) => s.isEditorsPick && s !== featured).slice(0, 3);
 
-  if (!featured) return null;
+  if (!featured) {
+    return (
+      <section className="relative pt-20 pb-24 md:pt-24 md:pb-32">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-12 space-y-14">
+          <SectionHeading eyebrow="Featured" title="Latest Stories" />
+          <ComingSoon
+            eyebrow="Arriving on the Ledger"
+            title="Every story deserves its own page."
+            message="Our editors are bringing each feature from our editions to the web, one story at a time. Until then, every story is waiting for you in the full edition, cover to cover."
+            secondary={{ to: '/submit-story', label: 'Share Your Story' }}
+          />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative pt-20 pb-24 md:pt-24 md:pb-32">

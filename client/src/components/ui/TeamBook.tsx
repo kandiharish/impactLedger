@@ -4,18 +4,18 @@ import HTMLFlipBook from 'react-pageflip';
 // Names and titles as printed in the magazine's masthead (Vol. 2, No. 1)
 const TEAM_MEMBERS = [
   {
-    name: 'Lahari Rami Reddy',
-    role: 'Editor-in-Chief',
-    img: '/team/lahari.webp',
-    quote: 'Some stories are meant to be read. Others are meant to be remembered.',
-    bio: 'Lahari leads the editorial direction of The Impact Ledger, bringing together stories of purpose, perseverance and progress from across India and beyond.',
-  },
-  {
     name: 'Varanasi Aditya Kiran',
     role: 'Chief Executive Officer',
     img: '/team/aditya.webp',
     quote: 'Stories of impact. Change that matters.',
     bio: 'Aditya leads The Impact Ledger as Chief Executive Officer, guiding the publication and its mission to document and amplify the people and organisations creating meaningful change.',
+  },
+  {
+    name: 'Lahari Rami Reddy',
+    role: 'Editor-in-Chief',
+    img: '/team/lahari.webp',
+    quote: 'Some stories are meant to be read. Others are meant to be remembered.',
+    bio: 'Lahari leads the editorial direction of The Impact Ledger, bringing together stories of purpose, perseverance and progress from across India and beyond.',
   },
 ];
 
