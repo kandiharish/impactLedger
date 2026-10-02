@@ -1,11 +1,16 @@
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Send, FileText, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, FileText, ChevronDown, UploadCloud, Loader2 } from 'lucide-react';
 import { api } from '../api';
+import SuccessCheck from '../components/ui/SuccessCheck';
+import FieldError from '../components/ui/FieldError';
+import { SplitHeading } from '../components/ui/Reveal';
+
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 const submissionSchema = z.object({
   organization: z.string().min(3, 'Organization name must be at least 3 characters'),
@@ -19,9 +24,22 @@ const submissionSchema = z.object({
 
 type SubmissionFormData = z.infer<typeof submissionSchema>;
 
+function FormSection({ number, title, children }: { number: string; title: string; children: ReactNode }) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4 pb-4 border-b border-line">
+        <span className="w-10 h-10 rounded-full bg-ink text-white flex items-center justify-center font-heading italic text-lg">{number}</span>
+        <h3 className="text-2xl font-serif text-ink font-semibold">{title}</h3>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export default function SubmitStory() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fileName, setFileName] = useState<string | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<SubmissionFormData>({
     resolver: zodResolver(submissionSchema),
@@ -33,6 +51,7 @@ export default function SubmitStory() {
       await api.submitStory(data);
       setSuccess(true);
       reset();
+      setFileName(null);
       setTimeout(() => setSuccess(false), 8000);
     } catch (err) {
       console.error('Error submitting story draft:', err);
@@ -43,198 +62,165 @@ export default function SubmitStory() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen relative bg-transparent text-gray-900">
-      {/* Background Noise overlay */}
-      <div className="absolute inset-0 bg-noise opacity-10 mix-blend-overlay pointer-events-none z-0"></div>
+    <div className="flex flex-col min-h-screen relative bg-transparent text-ink">
 
-      {/* Fixed Navbar (Floating Glass Pill - Logo on left without BG, Links inside glassy pill on right) */}
-      <nav className="fixed top-6 inset-x-4 md:inset-x-12 z-50 flex items-center justify-between pointer-events-none">
-        <Link to="/" className="pointer-events-auto">
-          <img src="/main%20logo.png" alt="The Impact Ledger" className="h-10 md:h-12 w-auto object-contain" />
-        </Link>
-        
-        <div className="pointer-events-auto flex items-center gap-1 md:gap-2 bg-white/70 backdrop-blur-md border border-gray-200/50 rounded-full px-6 py-2.5 shadow-md">
-          <Link to="/" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Home</Link>
-          <Link to="/about" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">About Us</Link>
+      <div className="relative z-10 w-full max-w-4xl mx-auto px-6 md:px-12 pt-40 md:pt-44 pb-28 space-y-14">
 
-          <Link to="/stories" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Stories</Link>
-          <Link to="/magazine" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Magazine</Link>
-          <Link to="/editorial" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Editorial</Link>
-          <Link to="/contact" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Contact Us</Link>
-          <Link to="/submit-story" className="bg-accent text-white px-5 py-2 rounded-full text-xs font-bold ml-2 hover:bg-[#B3936B] transition-colors shadow-sm">Submit Story</Link>
-        </div>
-      </nav>
-
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-6 md:px-12 pt-24 pb-16 space-y-8">
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center space-y-6"
-        >
-          <span className="text-xs uppercase tracking-widest text-accent font-semibold inline-flex items-center gap-2">
+        <div className="text-center space-y-7">
+          <motion.span
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 backdrop-blur border border-line text-[11px] uppercase tracking-[0.22em] text-accent-deep font-semibold"
+          >
             <FileText size={14} /> Editorial Board Submissions
-          </span>
-          <h1 className="text-5xl md:text-6xl font-serif font-bold text-gray-900 leading-tight">Submit Your Story</h1>
-          <p className="text-lg text-gray-600 font-light leading-relaxed max-w-2xl mx-auto">
+          </motion.span>
+          <SplitHeading as="h1" animateOnMount delay={0.3} text="Submit Your Story" className="display-title italic text-6xl md:text-8xl" />
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.55, ease: EASE }}
+            className="text-lg text-stone-600 font-light leading-relaxed max-w-2xl mx-auto"
+          >
             Has your organization achieved measurable social or environmental change? Submit a case study registry draft for editorial review.
-          </p>
-        </motion.div>
+          </motion.p>
+        </div>
 
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-[#FAF9F6] border border-gray-200 rounded-3xl p-8 md:p-12 shadow-sm relative overflow-hidden"
+          transition={{ duration: 1, delay: 0.5, ease: EASE }}
+          className="surface p-8 md:p-12 overflow-hidden"
         >
-          {success ? (
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} 
-              className="h-full min-h-[500px] flex flex-col justify-center items-center text-center space-y-6 relative z-10"
-            >
-              <div className="w-24 h-24 bg-green-500/10 text-green-600 border border-green-500/20 rounded-full flex items-center justify-center text-5xl shadow-sm">
-                <CheckCircle2 size={48} />
-              </div>
-              <h3 className="font-serif text-4xl font-bold text-gray-900">Draft Submitted</h3>
-              <p className="text-lg text-gray-600 max-w-md font-light leading-relaxed">
-                Your impact report draft has been successfully logged. Our editorial panel will review the metrics and outreach details within 5 business days.
-              </p>
-            </motion.div>
-          ) : (
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-10 relative z-10">
-              
-              {/* Section 1: Organization Info */}
-              <div className="space-y-6">
-                <div className="border-b border-gray-200 pb-4">
-                  <h3 className="text-xl font-serif text-gray-900 font-bold">1. Organization Details</h3>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-widest">Organization Name</label>
-                    <input
-                      type="text"
-                      {...register('organization')}
-                      className="w-full bg-white border border-gray-300 rounded-lg px-4 py-4 text-sm focus:outline-none focus:border-accent text-gray-900 placeholder-gray-400 transition-colors"
-                      placeholder="e.g. Himalayan Seed Trust"
-                    />
-                    {errors.organization && <p className="text-xs text-red-500">{errors.organization.message}</p>}
-                  </div>
+          <div className="absolute top-0 left-0 w-72 h-72 bg-accent/10 rounded-full blur-3xl -translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
 
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-widest">Contact Person</label>
-                    <input
-                      type="text"
-                      {...register('contactPerson')}
-                      className="w-full bg-white border border-gray-300 rounded-lg px-4 py-4 text-sm focus:outline-none focus:border-accent text-gray-900 placeholder-gray-400 transition-colors"
-                      placeholder="e.g. Sunita Devi"
-                    />
-                    {errors.contactPerson && <p className="text-xs text-red-500">{errors.contactPerson.message}</p>}
-                  </div>
-                </div>
+          <AnimatePresence mode="wait">
+            {success ? (
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: EASE }}
+                className="min-h-[500px] flex flex-col justify-center items-center text-center space-y-6 relative z-10"
+              >
+                <SuccessCheck />
+                <h3 className="font-heading italic text-5xl text-ink">Draft Submitted</h3>
+                <p className="text-lg text-stone-600 max-w-md font-light leading-relaxed">
+                  Your impact report draft has been successfully logged. Our editorial panel will review the metrics and outreach details within 5 business days.
+                </p>
+              </motion.div>
+            ) : (
+              <motion.form
+                key="form"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, y: -10 }}
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-12 relative z-10"
+                noValidate
+              >
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-widest">Contact Email</label>
-                  <input
-                    type="email"
-                    {...register('email')}
-                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-4 text-sm focus:outline-none focus:border-accent text-gray-900 placeholder-gray-400 transition-colors"
-                    placeholder="sunita@himalayanseed.org"
-                  />
-                  {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-                </div>
-              </div>
-
-              {/* Section 2: Story Info */}
-              <div className="space-y-6">
-                <div className="border-b border-gray-200 pb-4">
-                  <h3 className="text-xl font-serif text-gray-900 font-bold">2. Editorial Brief</h3>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-widest">Story Title</label>
-                    <input
-                      type="text"
-                      {...register('storyTitle')}
-                      className="w-full bg-white border border-gray-300 rounded-lg px-4 py-4 text-sm focus:outline-none focus:border-accent text-gray-900 placeholder-gray-400 transition-colors"
-                      placeholder="Catchy headline for your story"
-                    />
-                    {errors.storyTitle && <p className="text-xs text-red-500">{errors.storyTitle.message}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-widest">Impact Category</label>
-                    <div className="relative">
-                      <select
-                        {...register('category')}
-                        className="w-full bg-white border border-gray-300 rounded-lg px-4 py-4 text-sm focus:outline-none focus:border-accent text-gray-900 appearance-none transition-colors"
-                      >
-                        <option value="" className="text-gray-800">Select a category...</option>
-                        <option value="csr" className="text-gray-800">Corporate Social Responsibility</option>
-                        <option value="ngos" className="text-gray-800">NGOs & Non-Profits</option>
-                        <option value="healthcare" className="text-gray-800">Healthcare & Medicine</option>
-                        <option value="education" className="text-gray-800">Education & Literacy</option>
-                        <option value="women-empowerment" className="text-gray-800">Women Empowerment</option>
-                        <option value="environment" className="text-gray-800">Environment & Climate</option>
-                      </select>
+                {/* Section 1: Organization Info */}
+                <FormSection number="1" title="Organization Details">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="s-org" className="field-label">Organization Name</label>
+                      <input id="s-org" type="text" {...register('organization')} aria-invalid={!!errors.organization} className="field" placeholder="e.g. Himalayan Seed Trust" />
+                      <FieldError message={errors.organization?.message} />
                     </div>
-                    {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
+
+                    <div>
+                      <label htmlFor="s-contact" className="field-label">Contact Person</label>
+                      <input id="s-contact" type="text" {...register('contactPerson')} aria-invalid={!!errors.contactPerson} className="field" placeholder="e.g. Sunita Devi" />
+                      <FieldError message={errors.contactPerson?.message} />
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-widest">Executive Summary</label>
-                  <textarea
-                    {...register('summary')}
-                    rows={4}
-                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-4 text-sm focus:outline-none focus:border-accent text-gray-900 placeholder-gray-400 transition-colors resize-none"
-                    placeholder="Briefly describe the challenge, your intervention, and the outcome..."
-                  ></textarea>
-                  {errors.summary && <p className="text-xs text-red-500">{errors.summary.message}</p>}
-                </div>
+                  <div>
+                    <label htmlFor="s-email" className="field-label">Contact Email</label>
+                    <input id="s-email" type="email" {...register('email')} aria-invalid={!!errors.email} className="field" placeholder="sunita@himalayanseed.org" />
+                    <FieldError message={errors.email?.message} />
+                  </div>
+                </FormSection>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-widest">Impact Metrics & Data</label>
-                  <textarea
-                    {...register('impactMetrics')}
-                    rows={3}
-                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-4 text-sm focus:outline-none focus:border-accent text-gray-900 placeholder-gray-400 transition-colors resize-none"
-                    placeholder="Provide hard numbers: e.g., 'Restored 450 hectares', 'Taught 1,200 students'..."
-                  ></textarea>
-                  {errors.impactMetrics && <p className="text-xs text-red-500">{errors.impactMetrics.message}</p>}
-                </div>
+                {/* Section 2: Story Info */}
+                <FormSection number="2" title="Editorial Brief">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="s-title" className="field-label">Story Title</label>
+                      <input id="s-title" type="text" {...register('storyTitle')} aria-invalid={!!errors.storyTitle} className="field" placeholder="Catchy headline for your story" />
+                      <FieldError message={errors.storyTitle?.message} />
+                    </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-widest">Supporting Document (Optional)</label>
-                  <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition-colors">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <svg className="w-8 h-8 mb-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                        </svg>
-                        <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                        <p className="text-xs text-gray-400">PDF, DOC, DOCX (MAX. 10MB)</p>
+                    <div>
+                      <label htmlFor="s-category" className="field-label">Impact Category</label>
+                      <div className="relative">
+                        <select id="s-category" {...register('category')} aria-invalid={!!errors.category} className="field appearance-none pr-11 cursor-pointer">
+                          <option value="">Select a category...</option>
+                          <option value="csr">Corporate Social Responsibility</option>
+                          <option value="ngos">NGOs & Non-Profits</option>
+                          <option value="healthcare">Healthcare & Medicine</option>
+                          <option value="education">Education & Literacy</option>
+                          <option value="women-empowerment">Women Empowerment</option>
+                          <option value="environment">Environment & Climate</option>
+                        </select>
+                        <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
                       </div>
-                      <input type="file" className="hidden" accept=".pdf,.doc,.docx" />
+                      <FieldError message={errors.category?.message} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="s-summary" className="field-label">Executive Summary</label>
+                    <textarea id="s-summary" {...register('summary')} rows={4} aria-invalid={!!errors.summary} className="field resize-none" placeholder="Briefly describe the challenge, your intervention, and the outcome..."></textarea>
+                    <FieldError message={errors.summary?.message} />
+                  </div>
+
+                  <div>
+                    <label htmlFor="s-metrics" className="field-label">Impact Metrics & Data</label>
+                    <textarea id="s-metrics" {...register('impactMetrics')} rows={3} aria-invalid={!!errors.impactMetrics} className="field resize-none" placeholder="Provide hard numbers: e.g., 'Restored 450 hectares', 'Taught 1,200 students'..."></textarea>
+                    <FieldError message={errors.impactMetrics?.message} />
+                  </div>
+
+                  <div>
+                    <span className="field-label">Supporting Document (Optional)</span>
+                    <label className="group flex flex-col items-center justify-center w-full h-40 border-2 border-stone-200 border-dashed rounded-2xl cursor-pointer bg-white/70 hover:bg-accent-soft/40 hover:border-accent transition-all duration-500">
+                      <div className="flex flex-col items-center justify-center text-center px-4">
+                        <span className="w-12 h-12 rounded-full bg-accent-soft text-accent-deep flex items-center justify-center mb-3 transition-transform duration-500 group-hover:-translate-y-1">
+                          <UploadCloud size={22} />
+                        </span>
+                        {fileName ? (
+                          <p className="text-sm text-ink font-medium truncate max-w-xs">{fileName}</p>
+                        ) : (
+                          <p className="mb-1 text-sm text-stone-500"><span className="font-semibold text-ink">Click to upload</span> or drag and drop</p>
+                        )}
+                        <p className="text-xs text-stone-400">PDF, DOC, DOCX (MAX. 10MB)</p>
+                      </div>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.doc,.docx"
+                        onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
+                      />
                     </label>
                   </div>
-                </div>
-              </div>
+                </FormSection>
 
-              <div className="pt-6">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gray-950 text-white hover:bg-gray-800 font-bold py-5 px-8 rounded-lg tracking-wider transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 group shadow-sm"
+                  className="btn btn-dark btn-shine w-full !py-5 !rounded-xl !text-base disabled:opacity-60 disabled:pointer-events-none"
                 >
-                  {loading ? 'Submitting Draft...' : 'Submit Draft for Review'}
-                  {!loading && <Send size={18} className="group-hover:translate-x-1 transition-transform" />}
+                  {loading ? (
+                    <><Loader2 size={18} className="animate-spin" /> Submitting Draft...</>
+                  ) : (
+                    <>Submit Draft for Review <Send size={18} /></>
+                  )}
                 </button>
-              </div>
-            </form>
-          )}
+              </motion.form>
+            )}
+          </AnimatePresence>
         </motion.div>
       </div>
     </div>

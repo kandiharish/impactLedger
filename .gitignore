@@ -32,3 +32,8 @@ pnpm-debug.log*
 
 # Exclude all markdown files
 *.md
+
+.playwright-mcp/
+
+# Magazine PDFs are large and client-owned: keep them out of the public repo (they go to Supabase Storage)
+*.pdf

@@ -87,15 +87,24 @@ export default function TeamBook() {
           className={`flip-book z-40 bg-transparent transition-transform duration-700 ease-in-out ${isClosed ? 'md:-translate-x-1/4' : 'translate-x-0'}`}
         >
           {/* Front Cover */}
-          <Page number={0} className="bg-[#1a2430] shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+          <Page number={0} className="bg-[#171F2A] shadow-[10px_0_30px_rgba(0,0,0,0.5)]" style={{ backgroundImage: 'radial-gradient(120% 80% at 30% 0%, #26344A 0%, #171F2A 55%, #10161E 100%)' }}>
+             {/* Spine highlight */}
+             <div className="absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black/40 via-white/[0.06] to-transparent pointer-events-none"></div>
              <div className="w-full h-full flex flex-col justify-center items-center relative p-8">
                 <div className="w-full h-full border-[1px] border-[#C4A47C]/40 flex flex-col justify-center items-center p-8 text-center relative">
-                  <div className="absolute top-8 left-8 right-8 bottom-8 border-[1px] border-[#C4A47C]/20 pointer-events-none"></div>
-                  <span className="text-xs uppercase tracking-[0.4em] text-[#C4A47C] font-bold mb-8">The Impact Ledger</span>
-                  <h2 className="text-4xl md:text-6xl font-serif font-bold text-[#FDF9F1] leading-tight">
+                  <div className="absolute top-3 left-3 right-3 bottom-3 border-[1px] border-[#C4A47C]/20 pointer-events-none"></div>
+                  {/* Corner ornaments */}
+                  {['top-6 left-6', 'top-6 right-6 rotate-90', 'bottom-6 right-6 rotate-180', 'bottom-6 left-6 -rotate-90'].map((pos) => (
+                    <span key={pos} className={`absolute ${pos} w-5 h-5 border-t border-l border-[#C4A47C]/70 pointer-events-none`} />
+                  ))}
+                  <span className="w-16 h-16 rounded-full bg-[#FDF9F1] flex items-center justify-center mb-8 shadow-[0_0_0_6px_rgba(196,164,124,0.15)]">
+                    <img src="/main%20logo.png" alt="" className="h-9 w-auto" />
+                  </span>
+                  <span className="text-xs uppercase tracking-[0.4em] text-[#C4A47C] font-bold mb-6">The Impact Ledger</span>
+                  <h2 className="text-5xl md:text-7xl font-heading italic text-[#FDF9F1] leading-[0.95]">
                     Our<br/>Team
                   </h2>
-                  <div className="w-12 h-[2px] mt-10 bg-[#C4A47C]"></div>
+                  <div className="w-12 h-[2px] mt-10 bg-gradient-to-r from-transparent via-[#C4A47C] to-transparent"></div>
                 </div>
              </div>
           </Page>
@@ -161,7 +170,11 @@ export default function TeamBook() {
         </HTMLFlipBook>
       </div>
 
-      <div className="mt-8 text-xs text-gray-500 uppercase tracking-widest font-semibold">
+      <div className="mt-10 flex items-center gap-3 text-[10px] text-stone-500 uppercase tracking-[0.3em] font-semibold">
+        <span className="relative flex w-2 h-2">
+          <span className="absolute inset-0 rounded-full bg-accent animate-ping-slow" />
+          <span className="relative w-2 h-2 rounded-full bg-accent" />
+        </span>
         Drag or click page corners to turn
       </div>
     </div>

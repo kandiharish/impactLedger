@@ -1,51 +1,62 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUpRight, ChevronDown, Heart, Shield, Award, Landmark } from 'lucide-react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { ArrowUpRight, ArrowRight, Plus, Heart, Shield, Award, Landmark } from 'lucide-react';
 import { api } from '../api';
 import { mockMagazineIssues } from '../data/mockData';
 import TeamBook from '../components/ui/TeamBook';
 import ImpactMap from '../components/ui/ImpactMap';
+import { Reveal, SectionHeading, SplitHeading } from '../components/ui/Reveal';
+import CategoryTicker from '../components/home/CategoryTicker';
+import FeaturedStories from '../components/home/FeaturedStories';
+import SpotlightInterview from '../components/home/SpotlightInterview';
 
-// --- BlurText Component ---
-const BlurText = ({ text, className = "", delayOffset = 0 }: { text: string, className?: string, delayOffset?: number }) => {
-  const words = text.split(" ");
-  return (
-    <div className={`flex flex-wrap ${className}`}>
-      {words.map((word, i) => (
-        <motion.span
-          key={i}
-          className="inline-block mr-[0.28em]"
-          initial={{ filter: 'blur(10px)', opacity: 0, y: 50 }}
-          whileInView={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.7, delay: delayOffset + (i * 0.08), ease: "easeOut" }}
-        >
-          {word}
-        </motion.span>
-      ))}
-    </div>
-  );
-};
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const IDEOLOGY = [
+  { title: "Documenting Journeys", desc: "Every edition brings together remarkable journeys of leadership, innovation, and community transformation." },
+  { title: "Broad Spectrum", desc: "We explore subjects that shape society, including healthcare, education, women empowerment, sustainability, and legal affairs." },
+  { title: "Quiet Leadership", desc: "Celebrating those whose work often happens quietly but whose impact is felt for generations." },
+  { title: "Inspiring Tomorrow", desc: "Connecting changemakers and readers to build a culture where positive action inspires future leaders." }
+];
+
+const FOCUS_AREAS = [
+  { title: "NGO & Grassroots", desc: "Celebrating direct achievements, field challenges, and operational breakthroughs of field organizations.", icon: Heart },
+  { title: "CSR Initiatives", desc: "Investigating corporate commitment to healthcare, education, environmental welfare, and sustainability.", icon: Landmark },
+  { title: "Empowerment & Justice", desc: "Documenting self-help groups, microfinance success, gender parity, and legal reforms.", icon: Shield },
+  { title: "Innovation & Governance", desc: "Analyzing policy reforms, social enterprise strategies, and next-gen humanitarian designs.", icon: Award }
+];
+
+const FAQ_TABS = [
+  { id: 'about', label: 'About & Vision' },
+  { id: 'submissions', label: 'Editorial & Submissions' },
+  { id: 'standards', label: 'Distribution & Standards' }
+] as const;
+
+type FaqTab = typeof FAQ_TABS[number]['id'];
 
 // --- FAQ Accordion Item ---
-const FAQAccordionItem = ({ faq, isOpen, onToggle }: { faq: any, isOpen: boolean, onToggle: () => void }) => {
+const FAQAccordionItem = ({ faq, index, isOpen, onToggle }: { faq: any, index: number, isOpen: boolean, onToggle: () => void }) => {
   return (
-    <div className="border-b border-gray-200 py-6">
-      <button 
+    <div className={`rounded-2xl border transition-all duration-500 ${isOpen ? 'bg-white border-accent/30 shadow-[var(--shadow-soft)]' : 'bg-white/40 border-transparent hover:bg-white/70 hover:border-line'}`}>
+      <button
         onClick={onToggle}
-        className="w-full flex justify-between items-center text-left gap-4 group"
+        aria-expanded={isOpen}
+        className="w-full flex items-center text-left gap-5 px-6 md:px-8 py-6 group"
       >
-        <span className="text-lg md:text-xl font-serif text-gray-900 group-hover:text-accent transition-colors font-medium">
+        <span className={`font-heading italic text-2xl w-8 shrink-0 transition-colors ${isOpen ? 'text-accent' : 'text-stone-300 group-hover:text-accent'}`}>
+          {String(index + 1).padStart(2, '0')}
+        </span>
+        <span className="flex-1 text-lg md:text-xl font-serif text-ink font-medium leading-snug">
           {faq.question}
         </span>
-        <motion.span 
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
-          className="text-accent shrink-0"
+        <motion.span
+          animate={{ rotate: isOpen ? 45 : 0 }}
+          transition={{ duration: 0.4, ease: EASE }}
+          className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center border transition-colors duration-300 ${isOpen ? 'bg-ink border-ink text-white' : 'border-stone-300 text-stone-500 group-hover:border-accent group-hover:text-accent'}`}
         >
-          <ChevronDown size={20} />
+          <Plus size={16} />
         </motion.span>
       </button>
 
@@ -55,10 +66,10 @@ const FAQAccordionItem = ({ faq, isOpen, onToggle }: { faq: any, isOpen: boolean
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.5, ease: EASE }}
             className="overflow-hidden"
           >
-            <p className="mt-4 text-gray-600 font-sans font-light leading-relaxed text-sm md:text-base max-w-4xl">
+            <p className="pl-[4.75rem] md:pl-[5.25rem] pr-6 md:pr-16 pb-7 -mt-1 text-stone-600 font-sans font-light leading-relaxed text-[15px] md:text-base">
               {faq.answer}
             </p>
           </motion.div>
@@ -72,8 +83,15 @@ export default function Home() {
   const { data: magazineIssues = mockMagazineIssues } = useQuery({ queryKey: ['magazineIssues'], queryFn: () => api.getMagazineIssues() });
   const { data: faqs = [] } = useQuery({ queryKey: ['faqs'], queryFn: () => api.getFAQs() });
 
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-  const [activeFaqTab, setActiveFaqTab] = useState<'about' | 'submissions' | 'standards'>('about');
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [activeFaqTab, setActiveFaqTab] = useState<FaqTab>('about');
+
+  // Hero parallax
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const heroImgY = useTransform(scrollYProgress, [0, 1], ['0%', '18%']);
+  const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', '35%']);
+  const heroFade = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   // Categorize FAQs based on their indices/content
   const getCategorizedFAQs = () => {
@@ -90,106 +108,106 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen relative overflow-hidden text-gray-900 bg-transparent">
-      
-      {/* Fixed Navbar (Floating Glass Pill - Logo on left without BG, Links inside glassy pill on right) */}
-      <nav className="fixed top-6 inset-x-4 md:inset-x-12 z-50 flex items-center justify-between pointer-events-none">
-        <Link to="/" className="pointer-events-auto">
-          <img src="/main%20logo.png" alt="The Impact Ledger" className="h-10 md:h-12 w-auto object-contain" />
-        </Link>
-        
-        <div className="pointer-events-auto flex items-center gap-1 md:gap-2 bg-white/70 backdrop-blur-md border border-gray-200/50 rounded-full px-6 py-2.5 shadow-md">
-          <Link to="/" className="px-3 py-1.5 text-xs font-bold text-accent font-sans bg-white/40 shadow-sm rounded-full transition-all duration-300">Home</Link>
-          <Link to="/about" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">About Us</Link>
-
-          <Link to="/stories" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Stories</Link>
-          <Link to="/magazine" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Magazine</Link>
-          <Link to="/editorial" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Editorial</Link>
-          <Link to="/contact" className="px-3 py-1.5 text-xs font-medium text-gray-700 font-sans hover:text-accent hover:bg-white/40 rounded-full transition-all duration-300">Contact Us</Link>
-          <Link to="/submit-story" className="hidden sm:inline-block bg-accent text-white px-5 py-2 rounded-full text-xs font-bold ml-2 hover:bg-[#B3936B] transition-colors shadow-sm">Submit Story</Link>
-        </div>
-      </nav>
+    <div className="flex flex-col min-h-screen relative overflow-hidden text-ink bg-transparent">
 
       {/* --- HERO SECTION --- */}
-      <section className="relative h-screen min-h-[650px] flex flex-col justify-center overflow-hidden z-10">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="/ChatGPT Image Jul 22, 2026, 03_34_46 PM.png" 
-            alt="Hero Background" 
-            className="w-full h-full object-cover scale-105"
+      <section ref={heroRef} className="relative h-[100svh] min-h-[680px] flex flex-col justify-center overflow-hidden">
+        <motion.div className="absolute inset-0 z-0" style={{ y: heroImgY }}>
+          <motion.img
+            src="/ChatGPT Image Jul 22, 2026, 03_34_46 PM.png"
+            alt=""
+            initial={{ scale: 1.15 }}
+            animate={{ scale: 1.03 }}
+            transition={{ duration: 2.4, ease: EASE }}
+            className="w-full h-full object-cover object-[70%_center]"
           />
-          {/* Glassy white gradient overlay instead of blue */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/85 to-white/20"></div>
-        </div>
+          {/* Ivory wash — strongest behind the headline, clearing towards the image on the right */}
+          <div className="absolute inset-0 bg-gradient-to-r from-paper from-15% via-paper/75 via-45% to-paper/0" />
+          <div className="absolute inset-0 bg-gradient-to-t from-paper via-transparent to-paper/40" />
+        </motion.div>
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-24">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-6 inline-flex items-center gap-3 bg-white/80 border border-[#E5D5C0] rounded-full px-4 py-2 shadow-sm">
-            <span className="bg-accent text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Digest</span>
-            <span className="text-sm text-gray-800 pr-2 font-sans font-medium">The Premium Magazine of Social Impact</span>
+        <motion.div style={{ y: heroTextY, opacity: heroFade }} className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-12 pt-28">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.8, ease: EASE }}
+            className="mb-8 inline-flex items-center gap-3 bg-white/70 backdrop-blur-md border border-line rounded-full pl-1.5 pr-5 py-1.5 shadow-[var(--shadow-soft)]"
+          >
+            <span className="relative bg-ink text-white px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-[0.2em] flex items-center gap-2">
+              <span className="relative flex w-1.5 h-1.5">
+                <span className="absolute inset-0 rounded-full bg-accent animate-ping-slow" />
+                <span className="relative w-1.5 h-1.5 rounded-full bg-accent" />
+              </span>
+              Digest
+            </span>
+            <span className="text-[13px] text-stone-700 font-sans font-medium">The Premium Magazine of Social Impact</span>
           </motion.div>
 
-          <BlurText 
-            text="Documenting Stories That Change The World" 
-            className="text-5xl md:text-7xl lg:text-[6.5rem] font-heading italic text-gray-900 leading-[0.95] tracking-tight max-w-4xl"
+          <SplitHeading
+            as="h1"
+            animateOnMount
+            delay={0.45}
+            text="Documenting Stories That Change The World"
+            className="display-title italic text-[3.25rem] sm:text-7xl lg:text-[6.75rem] max-w-5xl"
           />
 
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
-            className="mt-8 text-lg md:text-xl text-gray-700 max-w-2xl font-sans font-light leading-relaxed"
+          <motion.div
+            initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 1.1, duration: 1.2, ease: EASE }}
+            className="mt-10 h-px w-40 origin-left bg-gradient-to-r from-accent to-transparent"
+          />
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1, duration: 0.9, ease: EASE }}
+            className="mt-8 text-lg md:text-xl text-stone-600 max-w-2xl font-sans font-light leading-relaxed"
           >
             Discover the universe of positive transformation. Our pioneering journalism and breakthrough editorials bring grassroots initiatives within reach-secure, verified, and extraordinary.
           </motion.p>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }} className="mt-10 flex flex-wrap items-center gap-6">
-            <Link to="/stories" className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-8 py-4 text-sm md:text-base font-semibold flex items-center gap-3 shadow-md transition-all">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.3, duration: 0.9, ease: EASE }} className="mt-10 flex flex-wrap items-center gap-6">
+            <Link to="/stories" className="btn btn-dark btn-shine btn-arrow-up !px-8 !py-4 md:!text-base">
               Explore Editorial <ArrowUpRight size={20} />
             </Link>
           </motion.div>
-        </div>
+        </motion.div>
+
       </section>
 
-      {/* --- SECTION 1: ABOUT US (Ideology cards/points instead of wall of text) --- */}
-      <section className="relative py-16 md:py-20 z-10 bg-transparent border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
-            
-            <motion.div 
-              initial={{ opacity: 0, x: -35 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
-              className="lg:col-span-5 space-y-6"
-            >
-              <span className="text-xs uppercase tracking-widest text-accent font-semibold flex items-center gap-2">
-                <span className="w-8 h-[1px] bg-accent"></span>
-                The Ideology
-              </span>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold italic text-gray-900 leading-tight">
-                Every Impact Deserves to Be Remembered
-              </h2>
-              <p className="text-gray-600 font-sans font-light leading-relaxed">
-                The Impact Ledger was founded on a simple yet powerful belief-that every act of impact deserves to be seen, celebrated, and remembered. We serve as a record of purpose, perseverance, and progress.
-              </p>
-            </motion.div>
+      {/* --- FIELDS OF IMPACT TICKER --- */}
+      <CategoryTicker />
 
-            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {[
-                { title: "Documenting Journeys", desc: "Every edition brings together remarkable journeys of leadership, innovation, and community transformation." },
-                { title: "Broad Spectrum", desc: "We explore subjects that shape society, including healthcare, education, women empowerment, sustainability, and legal affairs." },
-                { title: "Quiet Leadership", desc: "Celebrating those whose work often happens quietly but whose impact is felt for generations." },
-                { title: "Inspiring Tomorrow", desc: "Connecting changemakers and readers to build a culture where positive action inspires future leaders." }
-              ].map((item, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 25 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.6, delay: idx * 0.1 }}
-                  className="bg-[#FAF9F6] border border-gray-100 p-6 rounded-2xl shadow-sm"
-                >
-                  <h3 className="text-lg font-serif font-bold text-gray-900 mb-2 border-b border-accent/20 pb-2">{item.title}</h3>
-                  <p className="text-xs text-gray-600 font-sans leading-relaxed">{item.desc}</p>
-                </motion.div>
+      {/* --- FEATURED + EDITOR'S PICKS --- */}
+      <FeaturedStories />
+
+      {/* --- SECTION 1: ABOUT US (Ideology cards/points instead of wall of text) --- */}
+      <section className="relative py-24 md:py-32 border-t border-line">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-14 lg:gap-20 items-center">
+
+            <div className="lg:col-span-5 space-y-7 lg:sticky lg:top-32 self-start">
+              <Reveal y={12}><span className="eyebrow">The Ideology</span></Reveal>
+              <SplitHeading
+                text="Every Impact Deserves to Be Remembered"
+                className="font-heading italic text-5xl md:text-6xl text-ink leading-[1.02]"
+              />
+              <Reveal delay={0.2}>
+                <p className="lede text-[17px]">
+                  The Impact Ledger was founded on a simple yet powerful belief-that every act of impact deserves to be seen, celebrated, and remembered. We serve as a record of purpose, perseverance, and progress.
+                </p>
+              </Reveal>
+            </div>
+
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {IDEOLOGY.map((item, idx) => (
+                <Reveal key={idx} delay={idx * 0.08} className={idx % 2 === 1 ? 'sm:translate-y-10' : ''}>
+                  <div className="card card-hover gold-edge group p-8 h-full">
+                    <div className="flex items-center justify-between mb-8">
+                      <span className="font-heading italic text-4xl text-accent/70 group-hover:text-accent transition-colors">0{idx + 1}</span>
+                      <span className="w-9 h-9 rounded-full border border-line flex items-center justify-center text-stone-400 group-hover:bg-ink group-hover:text-white group-hover:border-ink transition-all duration-500">
+                        <ArrowUpRight size={15} />
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-serif font-semibold text-ink mb-3">{item.title}</h3>
+                    <p className="text-sm text-stone-600 font-sans font-light leading-relaxed">{item.desc}</p>
+                  </div>
+                </Reveal>
               ))}
             </div>
 
@@ -198,37 +216,28 @@ export default function Home() {
       </section>
 
       {/* --- SECTION 2: focus areas (The application focus) --- */}
-      <section className="relative py-16 md:py-20 bg-transparent z-10 border-y border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16">
-          <div className="text-center space-y-4 max-w-xl mx-auto">
-            <span className="text-xs uppercase tracking-widest text-accent font-semibold">Core Focus Areas</span>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900">Exploring Social Transformation</h2>
-            <p className="text-gray-600 font-sans font-light leading-relaxed text-sm md:text-base">
-              The Impact Ledger covers a vast spectrum of critical subjects shaping global communities.
-            </p>
-          </div>
+      <section className="relative py-24 md:py-32 bg-white/50 border-y border-line">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-12 space-y-16">
+          <SectionHeading
+            align="center"
+            eyebrow="Core Focus Areas"
+            title="Exploring Social Transformation"
+            lede="The Impact Ledger covers a vast spectrum of critical subjects shaping global communities."
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { title: "NGO & Grassroots", desc: "Celebrating direct achievements, field challenges, and operational breakthroughs of field organizations.", icon: Heart },
-              { title: "CSR Initiatives", desc: "Investigating corporate commitment to healthcare, education, environmental welfare, and sustainability.", icon: Landmark },
-              { title: "Empowerment & Justice", desc: "Documenting self-help groups, microfinance success, gender parity, and legal reforms.", icon: Shield },
-              { title: "Innovation & Governance", desc: "Analyzing policy reforms, social enterprise strategies, and next-gen humanitarian designs.", icon: Award }
-            ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                className="bg-white border border-gray-100 rounded-2xl p-8 space-y-6 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="p-3 w-fit rounded-xl bg-accent/10 transition-colors">
-                  <item.icon className="w-8 h-8 text-accent" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {FOCUS_AREAS.map((item, idx) => (
+              <Reveal key={idx} delay={idx * 0.08}>
+                <div className="card card-hover gold-edge group p-8 h-full flex flex-col overflow-hidden">
+                  {/* Large ghost icon that drifts in on hover */}
+                  <item.icon className="absolute -right-6 -bottom-6 w-36 h-36 text-accent/[0.06] transition-all duration-700 group-hover:text-accent/[0.12] group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[-8deg]" strokeWidth={1} />
+                  <div className="icon-badge mb-8">
+                    <item.icon className="w-6 h-6" strokeWidth={1.6} />
+                  </div>
+                  <h3 className="text-xl font-serif font-semibold text-ink mb-3">{item.title}</h3>
+                  <p className="text-sm text-stone-600 font-sans font-light leading-relaxed relative">{item.desc}</p>
                 </div>
-                <h3 className="text-xl font-serif font-semibold text-gray-900">{item.title}</h3>
-                <p className="text-sm text-gray-600 font-sans font-light leading-relaxed">{item.desc}</p>
-              </motion.div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -238,105 +247,102 @@ export default function Home() {
       <ImpactMap />
 
       {/* --- SECTION 3: MAGAZINE EDITIONS GRID (Replaces confusing 3D overlap) --- */}
-      <section className="relative py-16 md:py-20 z-10 bg-transparent max-w-7xl mx-auto px-6 md:px-12 space-y-12">
+      <section className="relative py-24 md:py-32 w-full max-w-[1400px] mx-auto px-6 md:px-12 space-y-14">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-4">
-            <span className="text-xs uppercase tracking-widest text-accent font-semibold">The Newsstand</span>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900">Digital Archives</h2>
-          </div>
-          <Link to="/magazine" className="text-accent font-bold hover:underline tracking-widest text-xs uppercase flex items-center gap-2">
-            View All Magazines &rarr;
-          </Link>
+          <SectionHeading eyebrow="The Newsstand" title="Digital Archives" />
+          <Reveal>
+            <Link to="/magazine" className="btn btn-ghost !text-xs uppercase tracking-[0.18em]">
+              View All Magazines <ArrowRight size={14} />
+            </Link>
+          </Reveal>
         </div>
 
-        {/* Clean, classic grid showcase of the issues */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-x-10">
           {magazineIssues.slice(0, 4).map((issue, idx) => (
-            <motion.div 
-              key={issue.id || issue._id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.08 }}
-              className="group cursor-pointer flex flex-col gap-4"
-            >
-              <div className="aspect-[3/4] rounded-lg overflow-hidden shadow-md group-hover:shadow-lg transition-shadow border border-gray-100 relative">
-                <img src={issue.coverImage} alt={issue.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102" />
-                <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors"></div>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-accent uppercase tracking-widest">{issue.issueNumber} • {issue.month} {issue.year}</p>
-                <h3 className="text-lg font-serif font-bold text-gray-900 leading-tight group-hover:text-accent transition-colors">{issue.title}</h3>
-              </div>
-            </motion.div>
+            <Reveal key={issue.id || issue._id} delay={idx * 0.08}>
+              <Link to="/magazine" className="group flex flex-col gap-5 [perspective:1200px]">
+                <div className="cover aspect-[3/4] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:[transform:translateY(-12px)_rotateY(-8deg)] group-hover:shadow-[0_40px_60px_-25px_rgba(40,28,12,0.55)]">
+                  <img src={issue.coverImage} alt={issue.title} className="w-full h-full object-cover transition-transform duration-[1.2s] group-hover:scale-105" />
+                  <div className="absolute inset-0 z-[3] bg-gradient-to-t from-ink/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-5">
+                    <span className="text-white text-[10px] font-semibold uppercase tracking-[0.25em] flex items-center gap-2">
+                      Open Issue <ArrowUpRight size={13} />
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-semibold text-accent-deep uppercase tracking-[0.22em]">{issue.issueNumber} • {issue.month} {issue.year}</p>
+                  <h3 className="text-lg md:text-xl font-serif font-semibold text-ink leading-snug group-hover:text-accent-deep transition-colors">{issue.title}</h3>
+                </div>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </section>
 
-      {/* --- SECTION 3.5: THE TEAM --- */}
-      <section className="relative py-16 md:py-20 z-10 bg-transparent border-t border-gray-100 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-4">
-              <span className="text-xs uppercase tracking-widest text-accent font-semibold">Behind The Ledger</span>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900">Our Team</h2>
-            </div>
-          </div>
+      {/* --- SPOTLIGHT INTERVIEW + TESTIMONIALS --- */}
+      <SpotlightInterview />
 
-          <TeamBook />
+      {/* --- SECTION 3.5: THE TEAM --- */}
+      <section className="relative py-24 md:py-32 bg-white/50 border-y border-line overflow-hidden">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-12 space-y-10">
+          <SectionHeading eyebrow="Behind The Ledger" title="Our Team" align="center" />
+          <Reveal delay={0.1}>
+            <TeamBook />
+          </Reveal>
         </div>
       </section>
 
       {/* --- SECTION 4: FAQ SECTION (Organized by Type, reveals accordingly) --- */}
-      <section className="relative py-16 md:py-20 z-10 border-t border-gray-100 bg-transparent">
-        <div className="max-w-4xl mx-auto px-6 md:px-12 space-y-16">
-          <div className="text-center space-y-4">
-            <span className="text-xs uppercase tracking-widest text-accent font-semibold">Support Desk</span>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900">Frequently Asked Questions</h2>
-            <p className="text-gray-600 font-sans font-light leading-relaxed max-w-md mx-auto">
-              Choose a category to find answers about submissions, distribution, and our editorial values.
-            </p>
-          </div>
+      <section className="relative py-24 md:py-32">
+        <div className="max-w-4xl mx-auto px-6 md:px-12 space-y-12">
+          <SectionHeading
+            align="center"
+            eyebrow="Support Desk"
+            title="Frequently Asked Questions"
+            lede="Choose a category to find answers about submissions, distribution, and our editorial values."
+          />
 
           {/* FAQ Tabs for categorization */}
-          <div className="flex justify-center border-b border-gray-200 gap-4 md:gap-8">
-            {[
-              { id: 'about', label: 'About & Vision' },
-              { id: 'submissions', label: 'Editorial & Submissions' },
-              { id: 'standards', label: 'Distribution & Standards' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setActiveFaqTab(tab.id as any);
-                  setOpenFaqIndex(null); // Close current faq
-                }}
-                className={`pb-4 text-xs md:text-sm font-bold uppercase tracking-widest border-b-2 transition-all ${
-                  activeFaqTab === tab.id ? 'border-accent text-accent' : 'border-transparent text-gray-400 hover:text-gray-600'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <Reveal className="flex justify-center">
+            <div className="inline-flex flex-wrap justify-center gap-1 p-1.5 rounded-full bg-white/70 border border-line backdrop-blur shadow-[var(--shadow-soft)]">
+              {FAQ_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveFaqTab(tab.id);
+                    setOpenFaqIndex(0);
+                  }}
+                  className={`relative px-4 md:px-6 py-2.5 rounded-full text-[11px] md:text-xs font-semibold uppercase tracking-[0.15em] transition-colors duration-300 ${
+                    activeFaqTab === tab.id ? 'text-white' : 'text-stone-500 hover:text-ink'
+                  }`}
+                >
+                  {activeFaqTab === tab.id && (
+                    <motion.span layoutId="faq-tab" className="absolute inset-0 rounded-full bg-ink" transition={{ type: 'spring', stiffness: 380, damping: 32 }} />
+                  )}
+                  <span className="relative z-10">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          </Reveal>
 
           {/* Categorized FAQs rendering */}
-          <div className="space-y-2 min-h-[350px]">
+          <div className="min-h-[420px]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeFaqTab}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.25 }}
-                className="divide-y divide-gray-200"
+                transition={{ duration: 0.35, ease: EASE }}
+                className="space-y-2"
               >
                 {getCategorizedFAQs().map((faq, idx) => (
-                  <FAQAccordionItem 
-                    key={faq.id || idx} 
-                    faq={faq} 
-                    isOpen={openFaqIndex === idx} 
-                    onToggle={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)} 
+                  <FAQAccordionItem
+                    key={faq.id || idx}
+                    faq={faq}
+                    index={idx}
+                    isOpen={openFaqIndex === idx}
+                    onToggle={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
                   />
                 ))}
               </motion.div>

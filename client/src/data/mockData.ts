@@ -38,6 +38,7 @@ export interface MagazineIssue {
   coverImage: string;
   editorsNote: string;
   featuredArticles: string[];
+  pdfUrl?: string;
   isTrending?: boolean;
   isMostRead?: boolean;
 }
