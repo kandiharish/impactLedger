@@ -260,7 +260,7 @@ export default function Home() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-x-10">
           {magazineIssues.slice(0, 4).map((issue, idx) => (
             <Reveal key={issue.id || issue._id} delay={idx * 0.08}>
-              <Link to="/magazine" className="group flex flex-col gap-5 [perspective:1200px]">
+              <Link to={issue.pageCount ? `/magazine/${issue.id || issue._id}/read` : "/magazine"} className="group flex flex-col gap-5 [perspective:1200px]">
                 <div className="cover aspect-[3/4] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:[transform:translateY(-12px)_rotateY(-8deg)] group-hover:shadow-[0_40px_60px_-25px_rgba(40,28,12,0.55)]">
                   <img src={issue.coverImage} alt={issue.title} className="w-full h-full object-cover transition-transform duration-[1.2s] group-hover:scale-105" />
                   <div className="absolute inset-0 z-[3] bg-gradient-to-t from-ink/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-5">

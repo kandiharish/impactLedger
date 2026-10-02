@@ -73,12 +73,18 @@ create table if not exists public.magazine_issues (
   editors_note      text not null default '',
   featured_articles text[] not null default '{}',
   pdf_url           text,                       -- the uploaded magazine PDF
+  pages_base_url    text,                       -- folder of page images 01.webp, 02.webp … for the reader
+  page_count        int,
   is_trending       boolean not null default false,
   is_most_read      boolean not null default false,
   status            text not null default 'draft' check (status in ('draft', 'published')),
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now()
 );
+
+-- Columns added after the first release (no-ops on fresh installs)
+alter table public.magazine_issues add column if not exists pages_base_url text;
+alter table public.magazine_issues add column if not exists page_count int;
 
 create table if not exists public.interviews (
   id           uuid primary key default gen_random_uuid(),

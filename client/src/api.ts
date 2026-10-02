@@ -90,6 +90,8 @@ const toIssue = (r: any): MagazineIssue => ({
   editorsNote: r.editors_note,
   featuredArticles: r.featured_articles ?? [],
   pdfUrl: r.pdf_url ?? undefined,
+  pagesBaseUrl: r.pages_base_url ?? undefined,
+  pageCount: r.page_count ?? undefined,
   isTrending: r.is_trending,
   isMostRead: r.is_most_read,
 });
@@ -172,6 +174,18 @@ export const api = {
     return unwrap(
       await supabase.from('magazine_issues').select('*').eq('status', 'published').order('release_date', { ascending: false }),
     ).map(toIssue);
+  },
+
+  getMagazineIssue: async (id: string): Promise<MagazineIssue> => {
+    if (!supabase) {
+      await delay(150);
+      const issue = mockMagazineIssues.find(m => m.id === id);
+      if (!issue) throw new Error('Issue not found');
+      return issue;
+    }
+    const row = unwrap(await supabase.from('magazine_issues').select('*').eq('id', id).eq('status', 'published').maybeSingle());
+    if (!row) throw new Error('Issue not found');
+    return toIssue(row);
   },
 
   getOrganizations: async (): Promise<Organization[]> => {

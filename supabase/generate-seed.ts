@@ -41,8 +41,8 @@ out.push('do $$ begin if not exists (select 1 from public.magazine_issues) then'
 mockMagazineIssues.forEach((m) => {
   const release = `${m.year}-${String(MONTHS.indexOf(m.month) + 1).padStart(2, '0')}-01`;
   out.push(
-    `  insert into public.magazine_issues (issue_number, title, month, year, release_date, cover_image, editors_note, featured_articles, is_trending, is_most_read, status) values (${[
-      m.issueNumber, m.title, m.month, m.year, release, m.coverImage, m.editorsNote].map(q).join(', ')}, ${arr(m.featuredArticles ?? [])}, ${q(!!m.isTrending)}, ${q(!!m.isMostRead)}, 'published');`,
+    `  insert into public.magazine_issues (issue_number, title, month, year, release_date, cover_image, editors_note, featured_articles, pdf_url, pages_base_url, page_count, is_trending, is_most_read, status) values (${[
+      m.issueNumber, m.title, m.month, m.year, release, m.coverImage, m.editorsNote].map(q).join(', ')}, ${arr(m.featuredArticles ?? [])}, ${q(m.pdfUrl)}, ${q(m.pagesBaseUrl)}, ${q(m.pageCount)}, ${q(!!m.isTrending)}, ${q(!!m.isMostRead)}, 'published');`,
   );
 });
 out.push('end if; end $$;', '');

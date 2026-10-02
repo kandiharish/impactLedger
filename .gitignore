@@ -37,3 +37,5 @@ pnpm-debug.log*
 
 # Magazine PDFs are large and client-owned: keep them out of the public repo (they go to Supabase Storage)
 *.pdf
+# …except the compressed web copies the website serves
+!client/public/magazines/**/*.pdf

@@ -39,6 +39,9 @@ export interface MagazineIssue {
   editorsNote: string;
   featuredArticles: string[];
   pdfUrl?: string;
+  /** Folder holding the page images 01.webp, 02.webp, … for the in-site reader */
+  pagesBaseUrl?: string;
+  pageCount?: number;
   isTrending?: boolean;
   isMostRead?: boolean;
 }
@@ -247,6 +250,25 @@ export const mockStories: Story[] = [
 ];
 
 export const mockMagazineIssues: MagazineIssue[] = [
+  {
+    id: 'vol-2-no-1',
+    issueNumber: 'Vol. 2, No. 1',
+    title: 'United by Purpose. Driven by Impact.',
+    month: 'August',
+    year: '2026',
+    coverImage: '/magazines/vol-2-no-1/cover.webp',
+    editorsNote: 'Some stories are meant to be read. Others are meant to be remembered. This edition brings a wider collection of impactful stories, fresh perspectives and journeys that deserve to be discovered.',
+    featuredArticles: [
+      'Arun Kumar: The Smile Behind the Struggle',
+      'Dr. Nawab Mir Nasir Ali Khan: Diplomacy, Enterprise and a Vision for the Future',
+      "The President's Train: From Royal Rails to a Modern Symbol of India",
+      "E20 From Farm to Fuel: How Ethanol Is Reshaping India's Energy Future",
+      'Heritage in Action: The American Telugu Association'
+    ],
+    pdfUrl: '/magazines/vol-2-no-1/the-impact-ledger-vol-2-no-1.pdf',
+    pagesBaseUrl: '/magazines/vol-2-no-1/pages',
+    pageCount: 60
+  },
   {
     id: 'mag1',
     issueNumber: 'Vol. 12',

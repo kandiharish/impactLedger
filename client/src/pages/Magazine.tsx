@@ -2,11 +2,19 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { BookOpen, Flame, ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react';
+import { BookOpen, Flame, ChevronLeft, ChevronRight, ArrowUpRight, Download } from 'lucide-react';
 import { api } from '../api';
 import { Reveal, SectionHeading } from '../components/ui/Reveal';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
+
+/** Opens the in-site reader when the issue has page images; otherwise renders a plain button. */
+function ReadLink({ issue, className, children }: { issue: any; className: string; children: React.ReactNode }) {
+  if (issue.pageCount && issue.pagesBaseUrl) {
+    return <Link to={`/magazine/${issue.id || issue._id}/read`} className={className}>{children}</Link>;
+  }
+  return <button className={className}>{children}</button>;
+}
 
 // --- 3D Magazine Cover Component (For Spotlight) ---
 function Magazine3DCover({ image, title }: { image: string, title: string }) {
@@ -159,9 +167,9 @@ function VaultSlider({ issues }: { issues: any[] }) {
                 {currentIssue.editorsNote || "Delve into our historical archives to explore timeless stories of systemic impact and profound change."}
               </p>
               <div className="pt-2 md:pt-4">
-                <button className="btn btn-ghost !text-xs uppercase tracking-[0.18em]">
+                <ReadLink issue={currentIssue} className="btn btn-ghost !text-xs uppercase tracking-[0.18em]">
                   Read This Volume <ArrowUpRight size={14} />
-                </button>
+                </ReadLink>
               </div>
             </div>
           </motion.div>
@@ -272,7 +280,7 @@ export default function Magazine() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.4, ease: EASE }}
-                className="display-title italic text-6xl md:text-8xl"
+                className="display-title italic text-5xl md:text-7xl"
               >
                 {latestIssue.title}
               </motion.h1>
@@ -291,10 +299,17 @@ export default function Magazine() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.7, ease: EASE }}
             >
-              <button className="btn btn-dark btn-shine !px-8 !py-4">
-                <BookOpen size={18} />
-                Read Issue
-              </button>
+              <div className="flex flex-wrap items-center gap-3">
+                <ReadLink issue={latestIssue} className="btn btn-dark btn-shine !px-8 !py-4">
+                  <BookOpen size={18} />
+                  Read Issue
+                </ReadLink>
+                {latestIssue.pdfUrl && (
+                  <a href={latestIssue.pdfUrl} download className="btn btn-ghost !px-6 !py-4">
+                    <Download size={16} /> Download PDF
+                  </a>
+                )}
+              </div>
             </motion.div>
 
             <motion.div

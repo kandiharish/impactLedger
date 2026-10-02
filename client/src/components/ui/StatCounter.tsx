@@ -15,7 +15,7 @@ export default function StatCounter({ value, label }: StatCounterProps) {
     if (!isInView) return;
 
     // Parse the numeric part and suffix
-    const numberMatch = value.match(/^(\d+)([K\+]*)$/);
+    const numberMatch = value.match(/^(\d+)([K+]*)$/);
     if (!numberMatch) {
       setDisplayValue(value);
       return;

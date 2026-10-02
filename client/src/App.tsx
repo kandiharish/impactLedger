@@ -11,6 +11,7 @@ import Contact from './pages/Contact';
 import SubmitStory from './pages/SubmitStory';
 import Editorial from './pages/Editorial';
 import NotFound from './pages/NotFound';
+import MagazineReader from './pages/MagazineReader';
 
 import PageTransition from './components/layout/PageTransition';
 import Navbar from './components/layout/Navbar';
@@ -55,6 +56,7 @@ function AnimatedRoutes() {
         <Route path="/stories" element={<PageTransition><Stories /></PageTransition>} />
         <Route path="/stories/:slug" element={<PageTransition><StoryDetail /></PageTransition>} />
         <Route path="/magazine" element={<PageTransition><Magazine /></PageTransition>} />
+        <Route path="/magazine/:issueId/read" element={<PageTransition><MagazineReader /></PageTransition>} />
         <Route path="/about" element={<PageTransition><About /></PageTransition>} />
 
         <Route path="/editorial" element={<PageTransition><Editorial /></PageTransition>} />
